@@ -15,8 +15,8 @@ export type RequestRow = {
   summary: string;
   narrative?: string;
   status: string;
-  created_at: Date;
-  updated_at: Date;
+  created_at: Date | string;
+  updated_at: Date | string;
   owner_name: string;
   needed: string;
   committed: string;
@@ -37,7 +37,7 @@ export type Commitment = {
   quantity: number;
   received: number;
   status: string;
-  created_at: Date;
+  created_at: Date | string;
   name: string;
   number: string;
   request_id: string;

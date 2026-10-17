@@ -1,8 +1,0 @@
-# Cloud onboarding keeps database files under /workspace so publication can snapshot them.
-# Use with: docker compose -f compose.yaml -f compose.cloud.yaml --env-file .env.local up -d --wait db
-services:
-  db:
-    volumes:
-      - type: bind
-        source: /workspace/.hta-postgres
-        target: /var/lib/postgresql/data

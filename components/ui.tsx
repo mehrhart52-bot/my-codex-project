@@ -71,7 +71,7 @@ export function Empty({
     </div>
   );
 }
-export const date = (value: Date) =>
+export const date = (value: Date | string) =>
   new Intl.DateTimeFormat("en-US", {
     dateStyle: "medium",
     timeZone: "America/New_York",

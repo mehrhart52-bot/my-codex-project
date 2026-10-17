@@ -1,10 +1,9 @@
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
-import { pool } from "@/lib/db";
+import { adminData } from "@/lib/service";
 import { action } from "@/app/actions";
 import { Submit } from "@/components/Submit";
 import { Flash, PageHead, date, type Params } from "@/components/ui";
-import type { User } from "@/lib/types";
 export default async function Admin({
   searchParams,
 }: {
@@ -12,12 +11,7 @@ export default async function Admin({
 }) {
   const user = await requireUser();
   if (user.role !== "admin") notFound();
-  const { rows } = await pool.query<User>(
-    "SELECT id,first_name,last_name,email,phone,role,approved,active FROM users ORDER BY approved,created_at DESC",
-  );
-  const { rows: history } = await pool.query(
-    "SELECT a.action,a.details,a.created_at,u.email FROM audit_history a LEFT JOIN users u ON u.id=a.actor_id ORDER BY a.id DESC LIMIT 100",
-  );
+  const { users, history } = await adminData();
   return (
     <>
       <Flash params={await searchParams} />
@@ -27,7 +21,7 @@ export default async function Admin({
         description="Approve staff access, manage permissions, and review significant changes."
       />
       <div className="stack">
-        {rows.map((u) => (
+        {users.map((u) => (
           <article className="card" key={u.id}>
             <div className="card-top">
               <div>

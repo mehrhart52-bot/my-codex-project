@@ -7,3 +7,5 @@ coverage/
 test-results/
 .local/
 playwright-report/
+.vercel/
+supabase/.temp/

@@ -2,7 +2,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireUser, signIn, signOut } from "@/lib/auth";
+import { requireUser, signOut } from "@/lib/auth";
 import { authenticate, register } from "@/lib/accounts";
 import {
   createRequest,
@@ -30,16 +30,16 @@ export async function action(form: FormData) {
   let error = false;
   try {
     if (op === "login") {
-      await signIn(await authenticate(form.get("email"), form.get("password")));
+      await authenticate(form.get("email"), form.get("password"));
       target = "/requests";
       message = "Welcome back.";
     } else if (op === "register") {
       const data = Object.fromEntries(form);
-      const userId = await register(data);
-      await signIn(userId);
-      target = "/requests";
-      message =
-        data.role === "social_worker"
+      const result = await register(data);
+      target = result.needsEmailConfirmation ? "/login" : "/requests";
+      message = result.needsEmailConfirmation
+        ? "Account created. Check your email to confirm your address, then log in."
+        : result.role === "social_worker"
           ? "Account created. An administrator must approve your social worker access."
           : "Your account is ready. Thank you for helping.";
     } else if (op === "logout") {
@@ -105,8 +105,7 @@ export async function action(form: FormData) {
           form.get("approved") === "yes",
           form.get("active") === "yes",
         );
-        message =
-          "Permissions updated. Previous sessions for this user were revoked.";
+        message = "Permissions updated. The change takes effect immediately.";
       } else throw new RuleError("Unknown action.");
     }
   } catch (e) {
