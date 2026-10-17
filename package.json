@@ -7,7 +7,15 @@
     "build": "next build",
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/*.test.ts",
+    "test": "npm run test:unit && npm run test:integration && npm run test:browser",
+    "test:unit": "tsx --test tests/*.test.ts",
+    "test:integration": "tsx --test tests/integration/*.test.ts",
+    "test:browser": "playwright test",
+    "test:hosted": "playwright test --config=playwright.hosted.config.ts",
+    "lab:setup": "node scripts/lab.mjs setup",
+    "lab:apply": "node scripts/lab.mjs apply",
+    "lab:dev": "node scripts/lab.mjs dev",
+    "lab:stop": "node scripts/lab.mjs stop",
     "format": "prettier --write app components lib scripts tests supabase *.ts *.json *.md",
     "format:check": "prettier --check app components lib scripts tests supabase *.ts *.json *.md"
   },
@@ -20,10 +28,14 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@types/node": "^24.10.0",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+    "pg": "^8.23.1",
     "prettier": "^3.9.10",
+    "supabase": "2.121.0",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   },

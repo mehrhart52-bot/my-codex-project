@@ -1,114 +1,48 @@
-# Supabase setup — step by step
+# Supabase setup
 
-You only need to do this once. Supabase has a free plan suitable for development and review. You will not install Supabase on your computer.
+Return to **[START_HERE.md](START_HERE.md)** for the normal first run and restart instructions.
 
-## 1. Create your Supabase account
+## Current development project
 
-1. Go to [supabase.com](https://supabase.com/) and select **Start your project**.
-2. Sign up with GitHub or with your email address.
-3. If Supabase asks for an organization, create one using any clear name, such as `Housing Transition Assistance`.
+The authorized hosted project is configured for fictional development data. Codex has:
 
-## 2. Create the project
+- applied `supabase/schema.sql` transactionally;
+- enabled email/password sign-in with immediate fictional-account access and a 12-character password minimum;
+- configured `http://localhost:3000` for local development;
+- created fictional administrator, approved social-worker, supporter, and secondary supporter accounts;
+- created a practice request; and
+- verified the full browser workflow against the hosted database.
 
-1. In the Supabase dashboard, select **New project**.
-2. Choose your organization.
-3. Enter a project name, such as `housing-transition-assistance`.
-4. Generate a strong database password and save it in a password manager. The app will not need this password, but you may need it for future database administration.
-5. Select a region near Syracuse or your expected users.
-6. Choose the Free plan while developing, then select **Create new project**.
-7. Wait until the dashboard says the project is ready.
+The app uses only the public project URL and publishable/anon key. It never uses the Supabase management token or a service-role key.
 
-## 3. Create the application database
+## Find the two public app settings
 
-1. In the left sidebar, open **SQL Editor**.
-2. Select **New query**.
-3. On GitHub, open `supabase/schema.sql`, select the copy button, and paste the entire file into the query editor.
-4. Select **Run**.
-5. You should see a success message. Running this file in a new project creates the full application database and its security rules.
+In the Supabase dashboard, open the project and select **Connect**. Copy:
 
-If Supabase reports an error, stop and copy the error message into this Codex chat. Do not keep rerunning a partially edited version.
+1. **Project URL** — starts with `https://` and ends with `.supabase.co`.
+2. **Publishable key** — usually starts with `sb_publishable_`. A legacy `anon` key also works.
 
-## 4. Configure sign-in for local development
+Run `npm run dev` in a fresh project download. The first run asks for those values and stores them in the Git-ignored `.env.local` file. Never enter a key labeled **secret** or **service_role**.
 
-1. Open **Authentication**, then **URL Configuration**.
-2. Set **Site URL** to `http://localhost:3000`.
-3. Add `http://localhost:3000/**` to **Redirect URLs** if it is not already allowed.
-4. Open **Authentication → Providers → Email**.
-5. Keep email/password sign-in enabled.
+## Management-token cleanup
 
-For the easiest private preview, you may temporarily turn **Confirm email** off. New accounts can then sign in immediately. Before inviting real users, turn it back on and configure a production email provider in Supabase so confirmation and recovery messages are delivered reliably.
+The temporary management token was required only for assisted setup. After Codex confirms the final GitHub push and environment check:
 
-## 5. Connect the app
+1. Open [Supabase Account → Access Tokens](https://supabase.com/dashboard/account/tokens).
+2. Revoke the token named **Codex development setup**.
+3. In Codex **Environment settings → Network secrets**, remove the temporary Supabase token entries.
+4. Save and publish that environment cleanup.
 
-1. Open **Project Settings → API Keys**. In some dashboard layouts this is called **Settings → API**.
-2. Find the **Project URL**. It looks like `https://abcdefgh.supabase.co`.
-3. Find the **Publishable key**. A legacy `anon` key also works if that is what your dashboard shows. Do not use the `service_role` or secret key.
-4. In the app's terminal, run:
+Revoking this token does not affect the app. The public URL and publishable key remain active.
 
-   ```sh
-   npm run dev
-   ```
+## Database changes
 
-5. Paste the project URL and publishable key when prompted.
-6. When the terminal says the server is ready, open [http://localhost:3000](http://localhost:3000).
+New projects use [supabase/schema.sql](supabase/schema.sql). Existing projects based on commit `5f12de1` can apply [the dashboard fix](supabase/updates/20261017_fix_dashboard.sql) without recreating data. Updating GitHub code does not apply future SQL changes to a running database.
 
-The values are saved in `.env.local`, which Git ignores. You will not be asked again on that computer unless the file is removed.
+The setup helper `scripts/hosted-setup.mjs` refuses to initialize a non-empty project unless explicitly resuming the authorized setup. Do not rerun onboarding to install ordinary code changes.
 
-## 6. Create the first administrator
+## Operating notes
 
-1. In the running application, choose **Create New Account** and register yourself as a Supporter. Use the same email you want for the administrator account.
-2. If email confirmation is enabled, open the confirmation email before continuing.
-3. Return to Supabase's **SQL Editor** and create a new query.
-4. Paste the following statement, replacing the example address with the exact lowercase email you registered:
+Everyone using the same project sees the same database, subject to their account role. Stopping the app does not erase Supabase data. A free Supabase project may pause after inactivity; resume it in the dashboard before retrying.
 
-   ```sql
-   update public.profiles
-   set role = 'admin', approved = true, updated_at = now()
-   where email = lower('your-email@example.com');
-   ```
-
-5. Select **Run**. The result should say one row was affected.
-6. Refresh the application. You should now see **Administration** in the navigation.
-
-This SQL step is deliberately outside ordinary registration, so nobody can make themselves an administrator through the website. After the first administrator exists, use the Administration screen to approve social workers or appoint another administrator.
-
-## 7. Check the main workflow
-
-Use fictional information while developing:
-
-1. Register a second account as a Social Worker.
-2. In the administrator account, open **Administration**, approve that social worker, and save.
-3. Log in as the social worker and create a request with two household items.
-4. Register a Supporter account and commit to an item.
-5. Return as the social worker, confirm a partial or complete receipt, then close the request.
-
-Do not enter names or identifying details for real clients while testing.
-
-## Sharing development with another person
-
-Each developer can clone the GitHub repository and run `npm run dev`. On their first run, they paste the same project URL and publishable key. They do not need Docker, a local database, or your database password.
-
-Everyone connected to the same Supabase project sees the same development data. Create a separate Supabase project later if you want development and production data kept apart; this is recommended before launch.
-
-## Later: deploying to Vercel
-
-Do this after local development is approved:
-
-1. Go to [vercel.com](https://vercel.com/) and sign up with the GitHub account that can access this repository.
-2. Select **Add New → Project** and import `mehrhart52-bot/my-codex-project`.
-3. Vercel should detect Next.js automatically. Keep the default build settings.
-4. Under **Environment Variables**, add:
-
-   - `NEXT_PUBLIC_SUPABASE_URL` — your Supabase Project URL
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` — your Supabase publishable key
-
-5. Select **Deploy**. Vercel will build the app and provide an address ending in `.vercel.app`.
-6. Return to Supabase **Authentication → URL Configuration**.
-7. Change **Site URL** to the exact Vercel production address and add both of these redirect entries:
-
-   - your exact Vercel address followed by `/**`
-   - `http://localhost:3000/**` so local development continues to work
-
-8. Test registration, login, each role, one commitment, and one receipt on the deployed site before inviting anyone.
-
-For production, use a separate Supabase project, enable email confirmation, configure custom SMTP email delivery, turn on Supabase backups appropriate to your plan, and use Vercel's production environment-variable scope. The publishable key may be present in browser code; never add the Supabase secret/service-role key to this application.
+Email confirmation is disabled for this private fictional-data exercise. Hosted email delivery and password recovery are not implemented or verified. Before real-world use, create a separate production project and review access, email, backups, retention, privacy, and organizational requirements.

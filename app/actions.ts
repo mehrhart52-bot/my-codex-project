@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser, signOut } from "@/lib/auth";
-import { authenticate, register } from "@/lib/accounts";
+import { authenticate } from "@/lib/accounts";
 import {
   createRequest,
   editRequest,
@@ -33,21 +33,19 @@ export async function action(form: FormData) {
       await authenticate(form.get("email"), form.get("password"));
       target = "/requests";
       message = "Welcome back.";
-    } else if (op === "register") {
-      const data = Object.fromEntries(form);
-      const result = await register(data);
-      target = result.needsEmailConfirmation ? "/login" : "/requests";
-      message = result.needsEmailConfirmation
-        ? "Account created. Check your email to confirm your address, then log in."
-        : result.role === "social_worker"
-          ? "Account created. An administrator must approve your social worker access."
-          : "Your account is ready. Thank you for helping.";
     } else if (op === "logout") {
       await signOut();
       target = "/";
       message = "You have been signed out.";
     } else {
       const user = await requireUser();
+      if (
+        op === "reduce" &&
+        user.role === "admin" &&
+        /^[1-9]\d{0,17}$/.test(id)
+      ) {
+        target = `/requests/${id}`;
+      }
       if (op === "create") {
         const r = await createRequest(user, {
           summary: form.get("summary"),

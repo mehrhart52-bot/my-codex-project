@@ -151,6 +151,7 @@ export default async function Detail({
                   {user.role === "admin" && c.status === "committed" && (
                     <form action={action} className="inline-form">
                       <input type="hidden" name="op" value="reduce" />
+                      <input type="hidden" name="requestId" value={id} />
                       <input type="hidden" name="commitmentId" value={c.id} />
                       <label>
                         Reduce committed total

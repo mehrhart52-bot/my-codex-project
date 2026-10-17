@@ -634,8 +634,8 @@ begin
   join public.profiles p on p.id = r.owner_id
   join public.request_items i on i.request_id = r.id
   left join (
-    select item_id, sum(quantity) committed, sum(received) received
-    from public.commitments group by item_id
+    select cm.item_id, sum(cm.quantity) as committed, sum(cm.received) as received
+    from public.commitments cm group by cm.item_id
   ) c on c.item_id = i.id
   where (p_status = 'all' or r.status = p_status)
     and (r.number ilike '%' || left(coalesce(p_search, ''), 120) || '%'
