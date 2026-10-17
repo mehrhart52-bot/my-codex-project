@@ -37,7 +37,10 @@ export default async function Layout({
               </span>
             </Link>
             <nav aria-label="Main navigation">
-              <Link href="/requests">View Existing Requests</Link>
+              {user && <Link href="/requests">View Existing Requests</Link>}
+              {user?.role === "social_worker" && (
+                <Link href="/dashboard">Home</Link>
+              )}
               {user && canCreate(user) && (
                 <Link href="/requests/new">Create New Request</Link>
               )}

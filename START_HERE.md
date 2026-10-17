@@ -2,6 +2,17 @@
 
 The application and its hosted Supabase development database are ready for fictional-data testing. Supabase keeps the accounts and requests when the app stops. Vercel has not been set up yet, so there is no public web address.
 
+## Preview in your browser with GitHub Codespaces
+
+1. Open [the GitHub repository](https://github.com/mehrhart52-bot/my-codex-project), select **Code → Codespaces**, and open your existing Codespace or create one on `main`.
+2. In its terminal, run `npm run dev`. A fresh checkout prompts for your Supabase project URL and publishable key.
+3. When port 3000 is detected, select **Open in Browser**. You can also open **Ports** and select the globe beside port 3000. Keep visibility **Private**.
+4. The first page offers **Login** and **Create New Account**. Approved social workers get a choice to create or view requests; supporters go directly to existing requests. New social workers need administrator approval to create requests.
+
+To update an existing Codespace after Codex pushes changes, stop the running app with **Control+C**, run `git pull --ff-only origin main`, and run `npm run dev` again. If Git reports local changes or a conflict, ask for help before discarding anything. Refresh the preview tab afterward.
+
+Stop the Codespace when finished; GitHub applies usage allowances and possible charges according to your account.
+
 ## The easiest preview on your Mac
 
 1. Install the current **LTS** version of Node.js from [nodejs.org](https://nodejs.org/) if it is not already installed. Open a new Terminal afterward. Node.js 22 or newer is required.
@@ -11,7 +22,7 @@ The application and its hosted Supabase development database are ready for ficti
 5. When prompted, paste the **Project URL** and **Publishable key** from your Supabase project's **Connect** dialog. Never use a secret or service-role key.
 6. Wait for **Ready**, then open [http://localhost:3000](http://localhost:3000) in Safari or Chrome.
 
-You should see **Housing Transition Assistance** and **Helping neighbors make a house a home**. The local address works only while `npm run dev` is running on that Mac.
+You should see **Housing Transition Assistance**, a login form, and a **Create New Account** link. The local address works only while `npm run dev` is running on that Mac.
 
 ## Stop and restart
 

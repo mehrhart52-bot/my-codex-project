@@ -9,14 +9,26 @@ const demos = JSON.parse(
     "utf8",
   ),
 );
-async function login(page: Page, account: { email: string; password: string }) {
+async function login(
+  page: Page,
+  account: { email: string; password: string; role?: string },
+) {
   await page.goto("/login");
   await page.getByLabel("Email address", { exact: true }).fill(account.email);
   await page.getByLabel("Password", { exact: true }).fill(account.password);
   await page.getByRole("button", { name: "Login", exact: true }).click();
-  await expect(page).toHaveURL(/\/requests\?message=/);
+  await expect(page).toHaveURL(
+    account.role === "social_worker"
+      ? /\/dashboard\?message=/
+      : /\/requests\?message=/,
+  );
   await expect(
-    page.getByRole("heading", { name: "A little help. A lasting impact." }),
+    page.getByRole("heading", {
+      name:
+        account.role === "social_worker"
+          ? "How can we help today?"
+          : "A little help. A lasting impact.",
+    }),
   ).toBeVisible();
 }
 async function register(page: Page, account: ReturnType<typeof identity>) {
@@ -31,8 +43,76 @@ async function register(page: Page, account: ReturnType<typeof identity>) {
     .getByLabel("Confirm Password", { exact: true })
     .fill(account.password);
   await page.getByRole("button", { name: "Create New Account" }).click();
-  await expect(page).toHaveURL(/\/requests\?message=/);
+  await expect(page).toHaveURL(
+    account.role === "social_worker"
+      ? /\/dashboard\?message=/
+      : /\/requests\?message=/,
+  );
 }
+
+test("entry shows login and registration, protects requests, and supports a narrow screen", async ({
+  page,
+}) => {
+  await page.goto("/");
+  await expect(
+    page.getByRole("heading", {
+      name: "Housing Transition Assistance",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Login", exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "View Existing Requests" }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole("link", { name: /Create New Request/ }),
+  ).toHaveCount(0);
+  await page.setViewportSize({ width: 375, height: 812 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth,
+    ),
+  ).toBe(true);
+  await page
+    .getByRole("main")
+    .getByRole("link", { name: "Create New Account" })
+    .click();
+  await expect(page).toHaveURL(/\/register$/);
+  await page.goto("/requests");
+  await expect(page).toHaveURL(/\/login$/);
+});
+
+test("returning workers choose an action and supporters go directly to requests", async ({
+  page,
+}) => {
+  await login(page, { ...demos.worker, role: "social_worker" });
+  await expect(
+    page.getByRole("main").getByRole("link", { name: /Create New Request/ }),
+  ).toBeVisible();
+  await page
+    .getByRole("main")
+    .getByRole("link", { name: "View Existing Requests" })
+    .click();
+  await expect(page).toHaveURL(/\/requests$/);
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/dashboard$/);
+  await page.getByRole("button", { name: "Logout" }).click();
+  await expect(
+    page.getByRole("button", { name: "Login", exact: true }),
+  ).toBeVisible();
+  await login(page, demos.supporter);
+  await expect(
+    page.getByRole("link", { name: /Create New Request/ }),
+  ).toHaveCount(0);
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/requests$/);
+  await page.goto("/dashboard");
+  await expect(page).toHaveURL(/\/requests$/);
+  await page.goto("/login");
+  await expect(page).toHaveURL(/\/requests$/);
+});
 
 test("registration errors preserve non-sensitive values and role, clear passwords, and stay by the field", async ({
   page,

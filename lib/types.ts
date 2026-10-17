@@ -50,3 +50,6 @@ export const canCreate = (u: User) =>
   u.role === "admin" || (u.role === "social_worker" && u.approved);
 export const canManage = (u: User, r: { owner_id: string }) =>
   u.role === "admin" || (canCreate(u) && r.owner_id === u.id);
+
+export const landingPage = (user: Pick<User, "role">) =>
+  user.role === "social_worker" ? "/dashboard" : "/requests";

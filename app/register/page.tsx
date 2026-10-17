@@ -1,3 +1,6 @@
+import { redirect } from "next/navigation";
+import { currentUser } from "@/lib/auth";
+import { landingPage } from "@/lib/types";
 import Link from "next/link";
 import RegistrationForm from "@/components/RegistrationForm";
 import { Flash, type Params } from "@/components/ui";
@@ -6,10 +9,12 @@ export default async function Register({
 }: {
   searchParams: Promise<Params>;
 }) {
+  const user = await currentUser();
+  if (user) redirect(landingPage(user));
   return (
     <div className="auth-shell wide">
       <p className="eyebrow">Join your community</p>
-      <h1>Be part of a fresh start.</h1>
+      <h1>Create an account</h1>
       <p className="muted">
         All fields are required. Your contact information is shared only with
         authorized request managers when you commit to items.

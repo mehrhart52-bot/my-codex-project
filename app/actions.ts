@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser, signOut } from "@/lib/auth";
+import { landingPage } from "@/lib/types";
 import { authenticate } from "@/lib/accounts";
 import {
   createRequest,
@@ -31,7 +32,7 @@ export async function action(form: FormData) {
   try {
     if (op === "login") {
       await authenticate(form.get("email"), form.get("password"));
-      target = "/requests";
+      target = landingPage(await requireUser());
       message = "Welcome back.";
     } else if (op === "logout") {
       await signOut();

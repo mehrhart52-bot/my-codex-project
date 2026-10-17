@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { landingPage } from "@/lib/types";
 import { register } from "@/lib/accounts";
 import { RuleError } from "@/lib/service";
 
@@ -64,6 +65,6 @@ export async function registerAction(
       ? "Account created. An administrator must approve your social worker access."
       : "Your account is ready. Thank you for helping.";
   redirect(
-    `${result.needsEmailConfirmation ? "/login" : "/requests"}?message=${encodeURIComponent(message)}`,
+    `${result.needsEmailConfirmation ? "/login" : landingPage(result)}?message=${encodeURIComponent(message)}`,
   );
 }
