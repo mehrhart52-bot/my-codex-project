@@ -1,0 +1,41 @@
+{
+  "name": "housing-transition-assistance",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --hostname 0.0.0.0",
+    "build": "next build",
+    "start": "next start --hostname 0.0.0.0",
+    "typecheck": "tsc --noEmit",
+    "db:migrate": "tsx --env-file=.env.local scripts/migrate.ts",
+    "admin:create": "tsx --env-file=.env.local scripts/admin.ts",
+    "db:seed": "tsx --env-file=.env.local scripts/seed.ts",
+    "test": "tsx --env-file=.env.local scripts/test.ts",
+    "test:e2e": "tsx --env-file=.env.local scripts/e2e.ts",
+    "format": "prettier --write app components lib scripts tests e2e *.ts *.json *.md *.yaml",
+    "format:check": "prettier --check app components lib scripts tests e2e *.ts *.json *.md *.yaml",
+    "env:init": "node scripts/init-env.mjs"
+  },
+  "dependencies": {
+    "iron-session": "^8.0.4",
+    "next": "^16.0.0",
+    "pg": "^8.16.3",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.64.1",
+    "@types/node": "^24.10.0",
+    "@types/pg": "^8.15.6",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "prettier": "^3.9.10",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "type": "module"
+}
