@@ -6,8 +6,8 @@ import { action } from "./actions";
 import "./globals.css";
 export const metadata: Metadata = {
   title: {
-    default: "Housing Transition Assistance",
-    template: "%s · Housing Transition Assistance",
+    default: "Housing Transition Assistance · Rescue Mission",
+    template: "%s · Rescue Mission",
   },
   description:
     "Helping neighbors make a house a home. Connect household needs with community generosity.",

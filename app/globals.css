@@ -1,13 +1,13 @@
 :root {
-  --ink: #203f37;
-  --green: #275e4b;
-  --green-dark: #184431;
-  --muted: #66756e;
-  --paper: #fbfaf6;
-  --line: #dedfd6;
-  --cream: #eeeadd;
-  --gold: #bc8b43;
-  --light: #edf3ed;
+  --ink: #191919;
+  --brand-red: #a52b1e;
+  --brand-dark: #7e2117;
+  --muted: #626262;
+  --paper: #fafafa;
+  --line: #dedede;
+  --cream: #f0f0f0;
+  --accent: #a52b1e;
+  --light: #fbefed;
 }
 * {
   box-sizing: border-box;
@@ -61,8 +61,8 @@ h3 {
 }
 h1,
 h2 {
-  font-family: Georgia, "Times New Roman", serif;
-  font-weight: 400;
+  font-family: Arial, Helvetica, sans-serif;
+  font-weight: 700;
 }
 h1 {
   font-size: clamp(32px, 4vw, 48px);
@@ -78,19 +78,19 @@ small {
   font-size: 12px;
 }
 em {
-  color: var(--green);
+  color: var(--brand-red);
 }
 .topline {
   padding: 8px 20px;
-  background: var(--ink);
-  color: #f5f5e9;
+  background: var(--brand-red);
+  color: #ffffff;
   text-align: center;
   font-size: 11px;
   letter-spacing: 1.2px;
 }
 .site-header {
   border-bottom: 1px solid var(--line);
-  background: var(--paper);
+  background: #fff;
 }
 .nav-wrap {
   max-width: 1240px;
@@ -106,8 +106,8 @@ em {
   align-items: center;
   gap: 12px;
   font:
-    20px/1.15 Georgia,
-    serif;
+    20px/1.15 Arial,
+    sans-serif;
   font-weight: 600;
   flex-shrink: 0;
 }
@@ -126,12 +126,12 @@ em {
 }
 .brand-mark {
   font-size: 40px;
-  border: 1px solid #b4c3ad;
+  border: 1px solid #dedede;
   border-radius: 50% 50% 6px 6px;
   width: 48px;
   height: 52px;
   text-align: center;
-  color: var(--green);
+  color: var(--brand-red);
 }
 nav {
   display: flex;
@@ -172,9 +172,9 @@ nav form {
   align-items: center;
   justify-content: center;
   gap: 20px;
-  border: 1px solid var(--green);
+  border: 1px solid var(--brand-red);
   border-radius: 5px;
-  background: var(--green);
+  background: var(--brand-red);
   color: #fff;
   padding: 12px 22px;
   line-height: 1.5;
@@ -185,13 +185,13 @@ nav form {
   text-decoration: none;
 }
 .button:hover {
-  background: var(--green-dark);
+  background: var(--brand-dark);
   text-decoration: none;
 }
 .button.secondary {
   background: transparent;
-  color: var(--green);
-  border-color: #9cac9f;
+  color: var(--brand-red);
+  border-color: #a52b1e;
 }
 .button.secondary:hover {
   background: var(--light);
@@ -216,7 +216,7 @@ nav form {
   font-size: 10px;
   letter-spacing: 2px;
   font-weight: 700;
-  color: var(--green);
+  color: var(--brand-red);
   margin-bottom: 15px;
 }
 .lead {
@@ -241,8 +241,8 @@ footer {
 footer strong {
   color: var(--ink);
   font:
-    18px Georgia,
-    serif;
+    600 18px Arial,
+    sans-serif;
 }
 footer p {
   margin-top: 6px;
@@ -265,7 +265,7 @@ footer > span {
 }
 .card,
 .request-card {
-  background: #fffefa;
+  background: #ffffff;
   border: 1px solid var(--line);
   border-radius: 7px;
   padding: 28px;
@@ -298,6 +298,8 @@ footer > span {
 }
 .auth-shell > .card {
   margin: 25px 0;
+  border-top: 4px solid var(--brand-red);
+  box-shadow: 0 8px 28px #00000008;
 }
 label {
   font-size: 13px;
@@ -311,7 +313,7 @@ textarea,
 select {
   background: #fff;
   color: var(--ink);
-  border: 1px solid #b5c0b6;
+  border: 1px solid #adadad;
   border-radius: 4px;
   padding: 11px 12px;
   min-width: 0;
@@ -326,7 +328,7 @@ textarea:focus,
 select:focus,
 button:focus-visible,
 a:focus-visible {
-  outline: 3px solid #a3bb91;
+  outline: 3px solid #a52b1e;
   outline-offset: 3px;
 }
 .hint {
@@ -341,7 +343,7 @@ a:focus-visible {
   padding: 16px 20px;
   border-radius: 5px;
   background: var(--light);
-  border-left: 3px solid #769675;
+  border-left: 3px solid #a52b1e;
   font-size: 13px;
 }
 .flash {
@@ -353,11 +355,12 @@ a:focus-visible {
   border-color: #b65f42;
 }
 .flash.success {
+  border-color: #28533b;
   background: #e9f2e9;
   color: #28533b;
 }
 .text-link {
-  color: var(--green);
+  color: var(--brand-red);
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -366,7 +369,7 @@ a:focus-visible {
   display: flex;
   align-items: end;
   gap: 16px;
-  background: #eeeede;
+  background: #f1f1f1;
   padding: 20px;
   border-radius: 6px;
 }
@@ -422,8 +425,8 @@ a:focus-visible {
 }
 .badge.closed,
 .badge.cancelled {
-  background: #eee9df;
-  color: #75654e;
+  background: #eeeeee;
+  color: #585858;
 }
 .badge.committed {
   background: #f6edd9;
@@ -451,8 +454,8 @@ a:focus-visible {
 .stats strong {
   display: block;
   font:
-    28px Georgia,
-    serif;
+    700 28px Arial,
+    sans-serif;
 }
 .stats span {
   display: block;
@@ -463,16 +466,16 @@ progress {
   width: 100%;
   height: 5px;
   border: 0;
-  background: #e9ecdf;
-  accent-color: var(--green);
+  background: #e6e6e6;
+  accent-color: var(--brand-red);
   margin: 5px 0 20px;
 }
 progress::-webkit-progress-bar {
-  background: #e9ecdf;
+  background: #e6e6e6;
   border-radius: 3px;
 }
 progress::-webkit-progress-value {
-  background: var(--green);
+  background: var(--brand-red);
   border-radius: 3px;
 }
 .request-link {
@@ -486,13 +489,13 @@ progress::-webkit-progress-value {
 .empty {
   text-align: center;
   padding: 65px 25px;
-  border: 1px dashed #bac5b7;
+  border: 1px dashed #bdbdbd;
   border-radius: 6px;
   margin: 20px 0;
 }
 .empty-icon {
   font-size: 55px;
-  color: #7b9478;
+  color: #a52b1e;
   display: block;
 }
 .empty p {
@@ -518,7 +521,7 @@ progress::-webkit-progress-value {
   gap: 26px;
 }
 .private {
-  background: #f0f1e8;
+  background: #f4f4f4;
 }
 .preserve {
   white-space: pre-wrap;
@@ -543,7 +546,7 @@ td {
 thead th {
   font-size: 10px;
   letter-spacing: 0.3px;
-  background: #f1f2e9;
+  background: #f4f4f4;
   color: var(--muted);
 }
 td code {
@@ -577,7 +580,7 @@ td code {
   width: 17px;
   height: 17px;
   flex-shrink: 0;
-  accent-color: var(--green);
+  accent-color: var(--brand-red);
 }
 .commitment {
   padding-top: 22px;
@@ -616,13 +619,13 @@ td code {
 }
 .privacy-note > span {
   font-size: 35px;
-  color: var(--gold);
+  color: var(--accent);
 }
 .privacy-note h3 {
   color: var(--ink);
   font:
-    22px Georgia,
-    serif;
+    600 22px Arial,
+    sans-serif;
 }
 .history {
   list-style: none;
