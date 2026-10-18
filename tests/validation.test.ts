@@ -32,8 +32,6 @@ test("registration accepts supporters and pending social workers only", () => {
 test("request and item validation enforce useful descriptions and whole quantities", () => {
   const valid = {
     summary: "A fictional neighbor needs help furnishing a new apartment.",
-    narrative:
-      "Private fictional circumstances for the assigned social worker.",
     items: [{ catalogId: 1, quantity: 2 }],
   };
   assert.equal(requestInput.parse(valid).items[0].quantity, 2);

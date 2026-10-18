@@ -27,7 +27,6 @@ export default async function Edit({
           initial={{
             id: r.id,
             summary: r.summary,
-            narrative: r.narrative!,
             items: data.items,
           }}
         />

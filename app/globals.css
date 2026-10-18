@@ -522,9 +522,6 @@ progress::-webkit-progress-value {
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: 26px;
 }
-.private {
-  background: #f4f4f4;
-}
 .preserve {
   white-space: pre-wrap;
   overflow-wrap: anywhere;

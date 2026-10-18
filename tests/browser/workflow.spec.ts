@@ -208,10 +208,8 @@ test("worker signup → admin approval → request → supporter signup and pled
       .click();
     const summary =
       "Fictional browser exercise: dining chairs for a fresh start.";
-    const narrative =
-      "PRIVATE-BROWSER-EXERCISE: fictional circumstances, visible only to the assigned worker.";
     await workerPage.getByLabel(/Public summary/).fill(summary);
-    await workerPage.getByLabel(/Private circumstances/).fill(narrative);
+    await expect(workerPage.getByLabel(/Private circumstances/)).toHaveCount(0);
     await workerPage
       .getByLabel("Item 1", { exact: true })
       .selectOption({ label: "Dining Chairs" });
@@ -222,12 +220,22 @@ test("worker signup → admin approval → request → supporter signup and pled
     await expect(workerPage).toHaveURL(/\/requests\/\d+\?message=/);
     const path = new URL(workerPage.url()).pathname;
     await expect(
-      workerPage.getByText(narrative, { exact: true }),
+      workerPage.getByRole("heading", { name: "Household circumstances" }),
+    ).toHaveCount(0);
+    expect(
+      (await workerPage.content()).includes(
+        "No private circumstances provided.",
+      ),
+    ).toBe(false);
+    await workerPage.getByRole("link", { name: "Edit request" }).click();
+    await expect(workerPage.getByLabel(/Private circumstances/)).toHaveCount(0);
+    await workerPage.getByRole("button", { name: "Save request" }).click();
+    await expect(
+      workerPage.getByText("Request updated.", { exact: true }),
     ).toBeVisible();
 
     await register(supporterPage, supporter);
     await supporterPage.goto(path);
-    expect((await supporterPage.content()).includes(narrative)).toBe(false);
     await supporterPage
       .getByLabel("Quantity of Dining Chairs to provide")
       .fill("3");
@@ -246,7 +254,6 @@ test("worker signup → admin approval → request → supporter signup and pled
     await login(otherPage, demos.other);
     await otherPage.goto(path);
     const unrelatedHtml = await otherPage.content();
-    expect(unrelatedHtml.includes(narrative)).toBe(false);
     expect(unrelatedHtml.includes(supporter.email)).toBe(false);
     await expect(
       otherPage.getByRole("heading", { name: "Household circumstances" }),

@@ -27,13 +27,11 @@ export const requestInput = z.object({
     .trim()
     .min(10, "Add a public summary of at least 10 characters.")
     .max(2000),
-  narrative: z
-    .string()
-    .trim()
-    .min(10, "Add a private narrative of at least 10 characters.")
-    .max(10000),
   items: z.array(itemInput).min(1, "Add at least one household item."),
 });
+
+const narrativeInput = z.string().trim().min(10).max(10000);
+const emptyNarrative = "No private circumstances provided.";
 
 function cleanMessage(message: string) {
   return message
@@ -53,7 +51,7 @@ export async function createRequest(_user: User, input: unknown) {
   const data = requestInput.parse(input);
   return rpc<{ id: string; number: string }>("create_request", {
     p_summary: data.summary,
-    p_narrative: data.narrative,
+    p_narrative: emptyNarrative,
     p_items: data.items,
   });
 }
@@ -62,16 +60,19 @@ export async function editRequest(_user: User, id: string, input: unknown) {
   const data = z
     .object({
       summary: requestInput.shape.summary,
-      narrative: requestInput.shape.narrative,
       items: z.array(z.object({ id: requestIdSchema, quantity: positive })),
       newItems: z.array(itemInput).default([]),
     })
     .parse(input);
 
+  const existing = await requestDetails(_user, id);
+  const narrative = narrativeInput.safeParse(existing?.request.narrative);
+  check(narrative.success, "Request details could not be read.");
+
   await rpc("edit_request", {
     p_request_id: validId(id),
     p_summary: data.summary,
-    p_narrative: data.narrative,
+    p_narrative: narrative.data,
     p_items: data.items,
     p_new_items: data.newItems,
   });

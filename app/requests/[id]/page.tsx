@@ -56,13 +56,6 @@ export default async function Detail({
             <h2>A fresh start, with your help.</h2>
             <p className="preserve">{r.summary}</p>
           </section>
-          {manager && (
-            <section className="card private">
-              <p className="eyebrow">Private · authorized staff only</p>
-              <h2>Household circumstances</h2>
-              <p className="preserve">{r.narrative}</p>
-            </section>
-          )}
           <section className="card">
             <h2>Household essentials</h2>
             <p className="muted">

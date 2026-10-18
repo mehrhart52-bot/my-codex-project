@@ -50,7 +50,6 @@ export async function action(form: FormData) {
       if (op === "create") {
         const r = await createRequest(user, {
           summary: form.get("summary"),
-          narrative: form.get("narrative"),
           items: JSON.parse(String(form.get("items") ?? "[]")),
         });
         target = `/requests/${r.id}`;
@@ -58,7 +57,6 @@ export async function action(form: FormData) {
       } else if (op === "edit") {
         await editRequest(user, id, {
           summary: form.get("summary"),
-          narrative: form.get("narrative"),
           items: JSON.parse(String(form.get("items") ?? "[]")),
           newItems: JSON.parse(String(form.get("newItems") ?? "[]")),
         });

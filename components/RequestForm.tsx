@@ -9,7 +9,7 @@ export default function RequestForm({
   initial,
 }: {
   catalog: { id: number; name: string }[];
-  initial?: { id: string; summary: string; narrative: string; items: Item[] };
+  initial?: { id: string; summary: string; items: Item[] };
 }) {
   const [rows, setRows] = useState<Row[]>(
     initial
@@ -28,10 +28,10 @@ export default function RequestForm({
       <input type="hidden" name="op" value={initial ? "edit" : "create"} />
       {initial && <input type="hidden" name="requestId" value={initial.id} />}
       <section className="card stack">
-        <h2>Tell the story, protect their privacy</h2>
+        <h2>Describe the household need</h2>
         <p className="notice">
           Do not include client names, contact information, addresses, or other
-          identifying details in either description.
+          identifying details in the public summary.
         </p>
         <label>
           Public summary{" "}
@@ -47,21 +47,6 @@ export default function RequestForm({
             rows={3}
             defaultValue={initial?.summary}
             placeholder="A neighbor is moving into their first apartment and needs a few essentials to settle in."
-          />
-        </label>
-        <label>
-          Private circumstances{" "}
-          <span className="hint">
-            Only the requesting social worker and administrators can read this.
-          </span>
-          <textarea
-            name="narrative"
-            required
-            minLength={10}
-            maxLength={10000}
-            rows={5}
-            defaultValue={initial?.narrative}
-            placeholder="Add context needed to coordinate this housing transition, without identifying the client."
           />
         </label>
       </section>
