@@ -360,6 +360,55 @@ test("worker signup → admin approval → request → supporter signup and pled
       adminPage.getByText("Request reopened.", { exact: true }),
     ).toBeVisible();
     await expect(adminPage.locator(".page-head .badge")).toHaveText("Open");
+
+    // An existing administrator can grant and later remove alternate access.
+    await adminPage.goto("/admin");
+    const ownAdminCard = adminPage
+      .locator("article")
+      .filter({ hasText: demos.admin.email });
+    await expect(
+      ownAdminCard.getByText(/Your administrator access is protected/),
+    ).toBeVisible();
+    await expect(
+      ownAdminCard.getByRole("button", { name: "Save permissions" }),
+    ).toHaveCount(0);
+    const alternateAdminCard = adminPage
+      .locator("article")
+      .filter({ hasText: supporter.email });
+    await alternateAdminCard.getByLabel("Role").selectOption("admin");
+    await alternateAdminCard
+      .getByRole("button", { name: "Save permissions" })
+      .click();
+    await expect(
+      adminPage.getByText(
+        "Permissions updated. The change takes effect immediately.",
+      ),
+    ).toBeVisible();
+
+    await supporterPage.goto("/admin");
+    await expect(
+      supporterPage.getByRole("heading", { name: "Administrator access" }),
+    ).toBeVisible();
+    const alternateSelfCard = supporterPage
+      .locator("article")
+      .filter({ hasText: supporter.email });
+    await expect(
+      alternateSelfCard.getByText(/Your administrator access is protected/),
+    ).toBeVisible();
+
+    await adminPage.goto("/admin");
+    const removableAdminCard = adminPage
+      .locator("article")
+      .filter({ hasText: supporter.email });
+    await removableAdminCard.getByLabel("Role").selectOption("supporter");
+    await removableAdminCard
+      .getByRole("button", { name: "Save permissions" })
+      .click();
+    await expect(
+      adminPage.getByText(
+        "Permissions updated. The change takes effect immediately.",
+      ),
+    ).toBeVisible();
   } finally {
     await Promise.all(contexts.map((c) => c.close()));
   }

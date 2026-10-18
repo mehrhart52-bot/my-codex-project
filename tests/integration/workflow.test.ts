@@ -17,6 +17,7 @@ test("real Supabase Auth, permissions, inventory, audit, and concurrent pledges"
     const unrelated = await signup("social_worker");
     const supporter = await signup();
     const other = await signup();
+    const alternateAdmin = await signup();
     await db.query(
       "update public.profiles set role='admin', approved=true where id=$1",
       [admin.id],
@@ -63,6 +64,60 @@ test("real Supabase Auth, permissions, inventory, audit, and concurrent pledges"
         assert.ok(
           (await rpc(admin.api, "admin_users")).some(
             (u: { id: string }) => u.id === worker.id,
+          ),
+        );
+      },
+    );
+
+    await t.test(
+      "administrators can grant and remove alternate administrator access safely",
+      async () => {
+        await rpc(admin.api, "update_user_permissions", {
+          p_user_id: alternateAdmin.id,
+          p_role: "admin",
+          p_approved: true,
+          p_active: true,
+        });
+        assert.ok(
+          (await rpc(alternateAdmin.api, "admin_users")).some(
+            (user: { id: string }) => user.id === admin.id,
+          ),
+        );
+        await denied(
+          alternateAdmin.api,
+          "update_user_permissions",
+          {
+            p_user_id: alternateAdmin.id,
+            p_role: "supporter",
+            p_approved: true,
+            p_active: true,
+          },
+          /Ask another active administrator/,
+        );
+        await rpc(admin.api, "update_user_permissions", {
+          p_user_id: alternateAdmin.id,
+          p_role: "supporter",
+          p_approved: true,
+          p_active: true,
+        });
+        const profile = await alternateAdmin.api
+          .from("profiles")
+          .select("role,active")
+          .single();
+        assert.deepEqual(profile.data, { role: "supporter", active: true });
+        const audit = await rpc(admin.api, "admin_audit");
+        assert.ok(
+          audit.some(
+            (entry: { action: string; details: { userId?: string } }) =>
+              entry.action === "user.administrator_granted" &&
+              entry.details.userId === alternateAdmin.id,
+          ),
+        );
+        assert.ok(
+          audit.some(
+            (entry: { action: string; details: { userId?: string } }) =>
+              entry.action === "user.administrator_removed" &&
+              entry.details.userId === alternateAdmin.id,
           ),
         );
       },

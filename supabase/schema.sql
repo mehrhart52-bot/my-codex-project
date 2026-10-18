@@ -582,6 +582,9 @@ begin
   if p_role not in ('supporter', 'social_worker', 'admin') then raise exception 'Invalid role.'; end if;
   select * into target from public.profiles where id = p_user_id for update;
   if not found then raise exception 'User not found.'; end if;
+  if target.id = actor.id and (p_role <> 'admin' or not p_active) then
+    raise exception 'Ask another active administrator to change your administrator access.';
+  end if;
   if target.role = 'admin' and target.active and
     (p_role <> 'admin' or not p_active) then
     select count(*) into admin_count from public.profiles
@@ -593,9 +596,24 @@ begin
     approved = case when p_role = 'social_worker' then p_approved else true end,
     active = p_active, updated_at = now()
   where id = p_user_id;
-  perform public._audit(actor.id, 'user.permissions_updated', null,
-    jsonb_build_object('userId', p_user_id, 'role', p_role,
-      'approved', p_approved, 'active', p_active));
+  perform public._audit(actor.id,
+    case
+      when target.role <> 'admin' and p_role = 'admin'
+        then 'user.administrator_granted'
+      when target.role = 'admin' and p_role <> 'admin'
+        then 'user.administrator_removed'
+      else 'user.permissions_updated'
+    end,
+    null,
+    jsonb_build_object(
+      'userId', p_user_id,
+      'previousRole', target.role,
+      'role', p_role,
+      'previousApproved', target.approved,
+      'approved', case when p_role = 'social_worker' then p_approved else true end,
+      'previousActive', target.active,
+      'active', p_active
+    ));
 end;
 $$;
 

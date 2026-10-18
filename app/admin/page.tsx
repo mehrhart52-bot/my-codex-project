@@ -21,6 +21,20 @@ export default async function Admin({
         description="Approve staff access, manage permissions, and review significant changes."
       />
       <div className="stack">
+        <section className="card stack">
+          <h2>Administrator access</h2>
+          <p>
+            To add an alternate administrator, find an existing account below,
+            choose <strong>Administrator</strong> as its role, and save the
+            permissions. Their access takes effect immediately.
+          </p>
+          <p className="notice">
+            For account safety, you cannot change your own administrator role or
+            deactivate your own account. Another active administrator can make
+            those changes, and the app always preserves at least one active
+            administrator.
+          </p>
+        </section>
         {users.map((u) => (
           <article className="card" key={u.id}>
             <div className="card-top">
@@ -32,41 +46,56 @@ export default async function Admin({
                   {u.email} · {u.phone}
                 </p>
               </div>
-              {u.role === "social_worker" && !u.approved && (
-                <span className="badge cancelled">Approval pending</span>
-              )}
+              <div className="actions">
+                {u.id === user.id && (
+                  <span className="badge">Your account</span>
+                )}
+                {u.role === "admin" && (
+                  <span className="badge">Administrator</span>
+                )}
+                {u.role === "social_worker" && !u.approved && (
+                  <span className="badge cancelled">Approval pending</span>
+                )}
+              </div>
             </div>
-            <form action={action} className="inline-form">
-              <input type="hidden" name="op" value="user" />
-              <input type="hidden" name="userId" value={u.id} />
-              <label>
-                Role
-                <select name="role" defaultValue={u.role}>
-                  <option value="supporter">Supporter</option>
-                  <option value="social_worker">Social worker</option>
-                  <option value="admin">Administrator</option>
-                </select>
-              </label>
-              <label className="check">
-                <input
-                  type="checkbox"
-                  name="approved"
-                  value="yes"
-                  defaultChecked={u.approved}
-                />
-                Approved for social work
-              </label>
-              <label className="check">
-                <input
-                  type="checkbox"
-                  name="active"
-                  value="yes"
-                  defaultChecked={u.active}
-                />
-                Account active
-              </label>
-              <Submit>Save permissions</Submit>
-            </form>
+            {u.id === user.id ? (
+              <p className="muted">
+                Your administrator access is protected. Ask another active
+                administrator to change it.
+              </p>
+            ) : (
+              <form action={action} className="inline-form">
+                <input type="hidden" name="op" value="user" />
+                <input type="hidden" name="userId" value={u.id} />
+                <label>
+                  Role
+                  <select name="role" defaultValue={u.role}>
+                    <option value="supporter">Supporter</option>
+                    <option value="social_worker">Social worker</option>
+                    <option value="admin">Administrator</option>
+                  </select>
+                </label>
+                <label className="check">
+                  <input
+                    type="checkbox"
+                    name="approved"
+                    value="yes"
+                    defaultChecked={u.approved}
+                  />
+                  Approved for social work
+                </label>
+                <label className="check">
+                  <input
+                    type="checkbox"
+                    name="active"
+                    value="yes"
+                    defaultChecked={u.active}
+                  />
+                  Account active
+                </label>
+                <Submit>Save permissions</Submit>
+              </form>
+            )}
           </article>
         ))}
         <section className="card">

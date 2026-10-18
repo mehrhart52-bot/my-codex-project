@@ -133,7 +133,7 @@ export async function changeStatus(
 }
 
 export async function updateUser(
-  _user: User,
+  user: User,
   id: string,
   role: string,
   approved: boolean,
@@ -143,6 +143,10 @@ export async function updateUser(
   check(
     ["supporter", "social_worker", "admin"].includes(role),
     "Invalid role.",
+  );
+  check(
+    user.id !== id || (role === "admin" && active),
+    "Ask another active administrator to change your administrator access.",
   );
   await rpc("update_user_permissions", {
     p_user_id: id,
