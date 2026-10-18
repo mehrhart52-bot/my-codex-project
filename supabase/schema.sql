@@ -465,11 +465,11 @@ begin
     raise exception 'You cannot manage this commitment.';
   end if;
   if commitment.status <> 'committed' then
-    raise exception 'Only commitments with unreceived items can be reduced.';
+    raise exception 'Only active commitments can be reduced.';
   end if;
   if p_quantity < 0 or p_quantity >= commitment.quantity or
     p_quantity < commitment.received then
-    raise exception 'Reduce the total, keeping at least the quantity already received.';
+    raise exception 'Choose a smaller valid commitment total.';
   end if;
 
   previous := commitment.quantity;
@@ -482,50 +482,6 @@ begin
     parent_request,
     jsonb_build_object('commitmentId', p_commitment_id, 'previous', previous,
       'quantity', p_quantity));
-end;
-$$;
-
-create or replace function public.receive_items(
-  p_commitment_id bigint,
-  p_quantity integer
-)
-returns void
-language plpgsql
-security definer set search_path = public, pg_temp
-as $$
-declare
-  actor public.profiles%rowtype := public._current_profile();
-  parent_request bigint;
-  req public.requests%rowtype;
-  commitment public.commitments%rowtype;
-begin
-  select i.request_id into parent_request
-  from public.commitments c join public.request_items i on i.id = c.item_id
-  where c.id = p_commitment_id;
-  if parent_request is null then raise exception 'Commitment not found.'; end if;
-  select * into req from public.requests where id = parent_request for update;
-  if not (actor.role = 'admin' or
-    (actor.role = 'social_worker' and actor.approved and req.owner_id = actor.id)) then
-    raise exception 'You cannot record receipts for this request.';
-  end if;
-  if req.status <> 'open' then raise exception 'Reopen the request before recording receipts.'; end if;
-  select * into commitment from public.commitments
-  where id = p_commitment_id for update;
-  if p_quantity < 1 or commitment.status <> 'committed' or
-    p_quantity > commitment.quantity - commitment.received then
-    raise exception 'Receipt exceeds the remaining committed quantity.';
-  end if;
-
-  insert into public.receipts(commitment_id, quantity, recorded_by)
-  values (p_commitment_id, p_quantity, actor.id);
-  update public.commitments
-  set received = received + p_quantity,
-    status = case when received + p_quantity = quantity then 'received'
-      else 'committed' end,
-    updated_at = now()
-  where id = p_commitment_id;
-  perform public._audit(actor.id, 'items.received', parent_request,
-    jsonb_build_object('commitmentId', p_commitment_id, 'quantity', p_quantity));
 end;
 $$;
 
@@ -820,7 +776,6 @@ revoke all on function public.create_request(text, text, jsonb),
   public.edit_request(bigint, text, text, jsonb, jsonb),
   public.commit_items(bigint, jsonb),
   public.reduce_commitment(bigint, integer),
-  public.receive_items(bigint, integer),
   public.change_request_status(bigint, text),
   public.update_user_permissions(uuid, text, boolean, boolean),
   public.list_requests(text, text), public.request_details(bigint),
@@ -831,7 +786,6 @@ grant execute on function public.create_request(text, text, jsonb),
   public.edit_request(bigint, text, text, jsonb, jsonb),
   public.commit_items(bigint, jsonb),
   public.reduce_commitment(bigint, integer),
-  public.receive_items(bigint, integer),
   public.change_request_status(bigint, text),
   public.update_user_permissions(uuid, text, boolean, boolean),
   public.list_requests(text, text), public.request_details(bigint),

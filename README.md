@@ -4,7 +4,7 @@ Helping neighbors make a house a home.
 
 **[Start here → START_HERE.md](START_HERE.md)** explains the current setup, opening and restarting the app, and a fictional-data exercise.
 
-The app connects social workers managing household needs with supporters who provide items. It supports staff approval, private narratives, pledges, partial receipts, reductions, cancellation, manual closure, administrator reopening, and audit records.
+The app connects social workers managing household needs with supporters who provide items. It supports staff approval, public household summaries, commitments, reductions, cancellation, manual closure, administrator reopening, and audit records.
 
 ## Normal development
 
@@ -33,7 +33,7 @@ The complete `npm test` suite also runs real Supabase integration and Chromium b
 
 New projects use [supabase/schema.sql](supabase/schema.sql). Existing projects at migration commit `5f12de1` can apply [the dashboard fix](supabase/updates/20261017_fix_dashboard.sql) without recreating tables. Updating code alone does not apply SQL.
 
-All application mutations use database functions that verify the current account and role. Inventory operations lock the request to prevent competing pledges from exceeding demand. Row-level security and table permissions prevent direct reads of private request data. Owners and administrators can see private narratives; supporters receive public summaries and their own commitments.
+All application mutations use database functions that verify the current account and role. Inventory operations lock the request to prevent competing commitments from exceeding demand. Row-level security and table permissions prevent direct reads of private request data. Owners and administrators can see private narratives; supporters receive public summaries and their own commitments.
 
 The app uses only a publishable/anon key. It never uses the management token or a service-role key. The optional isolated test-lab tooling uses local administrative credentials to prepare fictional fixtures.
 

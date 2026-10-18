@@ -15,7 +15,7 @@ A deployed preview is a web-accessible application, even if its database contain
 3. Keep the detected **Next.js** settings. Add the two application environment variables: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Use the appropriate development or production Supabase project. Never add the management token or a secret/service-role key.
 4. Select **Deploy**. A successful build gives you a Vercel app address.
 5. Configure the exact address in Supabase **Authentication → URL Configuration**. Keep development and production redirect settings scoped appropriately.
-6. Verify login, each role, private-data restrictions, a pledge, receipt, closure, and reopening on that deployed address. A successful build alone is not verification.
+6. Verify login, each role, private-data restrictions, a commitment, closure, and reopening on that deployed address. A successful build alone is not verification.
 
 GitHub pushes can trigger new Vercel builds after that integration exists. SQL updates still require a separate authorized database step.
 

@@ -8,9 +8,7 @@ export function Badge({ status }: { status: string }) {
           ? "Closed"
           : status === "committed"
             ? "Committed"
-            : status === "received"
-              ? "Received"
-              : "Cancelled"}
+            : "Cancelled"}
     </span>
   );
 }

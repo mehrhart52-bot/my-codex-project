@@ -57,8 +57,8 @@ export default function CommitForm({
         )}
       />
       <p className="hint">
-        Please commit only to items you intend to provide. You can reduce any
-        undelivered quantity in My Commitments.
+        Please commit only to items you intend to provide. You can reduce your
+        quantity later in My Commitments.
       </p>
       <Submit pending="Reserving items…">Confirm commitment</Submit>
     </form>

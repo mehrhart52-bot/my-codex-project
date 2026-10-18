@@ -107,18 +107,6 @@ export async function reduceCommitment(
   });
 }
 
-export async function receiveItems(
-  _user: User,
-  commitmentId: string,
-  quantity: number,
-) {
-  positive.parse(quantity);
-  await rpc("receive_items", {
-    p_commitment_id: validId(commitmentId),
-    p_quantity: quantity,
-  });
-}
-
 export async function changeStatus(
   _user: User,
   id: string,
@@ -161,24 +149,51 @@ export async function listRequests(
   status: string,
   search: string,
 ): Promise<RequestRow[]> {
-  return rpc<RequestRow[]>("list_requests", {
-    p_status: status,
-    p_search: search.slice(0, 120),
-  });
+  const rows = await rpc<(RequestRow & { received?: string })[]>(
+    "list_requests",
+    {
+      p_status: status,
+      p_search: search.slice(0, 120),
+    },
+  );
+  return rows.map(({ received: _legacyReceived, ...row }) => row);
 }
 
 export async function requestDetails(_user: User, id: string) {
   const data = await rpc<{
     request: RequestRow;
-    items: Item[];
-    commitments: Commitment[];
+    items: (Item & { received?: number })[];
+    commitments: (Omit<Commitment, "modifiable"> & {
+      received?: number;
+    })[];
     history: { action: string; details: unknown; created_at: string }[];
   } | null>("request_details", { p_request_id: validId(id) });
-  return data;
+  if (!data) return null;
+  return {
+    ...data,
+    items: data.items.map(({ received: _legacyReceived, ...item }) => item),
+    commitments: data.commitments.map(
+      ({ received: _legacyReceived, ...commitment }) => ({
+        ...commitment,
+        status:
+          commitment.status === "received" ? "committed" : commitment.status,
+        modifiable: commitment.status === "committed",
+      }),
+    ),
+    history: data.history.filter((entry) => entry.action !== "items.received"),
+  };
 }
 
 export async function myCommitments(_user: User): Promise<Commitment[]> {
-  return rpc<Commitment[]>("my_commitments");
+  const rows =
+    await rpc<(Omit<Commitment, "modifiable"> & { received?: number })[]>(
+      "my_commitments",
+    );
+  return rows.map(({ received: _legacyReceived, ...commitment }) => ({
+    ...commitment,
+    status: commitment.status === "received" ? "committed" : commitment.status,
+    modifiable: commitment.status === "committed",
+  }));
 }
 
 const catalogOrder = [

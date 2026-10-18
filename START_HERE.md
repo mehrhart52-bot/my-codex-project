@@ -46,19 +46,19 @@ Use **Logout** before changing accounts, or use separate private browser windows
 2. Register a fictional social worker. Confirm that approval is pending.
 3. As the administrator, approve that worker.
 4. As the worker, create a request using only fictional details.
-5. As a supporter, pledge an item. Confirm that the private household circumstances are hidden.
-6. As the worker, record a partial delivery and close the request.
+5. As a supporter, commit to an item. Confirm that private household information is hidden.
+6. As the worker, review the commitments and close the request.
 7. As the administrator, reopen it.
 
-Codex has automated this entire workflow against the hosted project, including account registration, approval, pledging, partial receipt, cancellation, closure, reopening, and privacy checks.
+Codex has automated this entire workflow against the hosted project, including account registration, approval, commitments, cancellation, closure, reopening, and privacy checks.
 
 ## What each service does
 
-| Service  | Purpose                                                  |
-| -------- | -------------------------------------------------------- |
-| GitHub   | Stores the application code and change history.          |
-| Supabase | Stores accounts, requests, pledges, and deliveries.      |
-| Your Mac | Runs the app during local development.                   |
-| Vercel   | Can host the app later and provide a public web address. |
+| Service  | Purpose                                                    |
+| -------- | ---------------------------------------------------------- |
+| GitHub   | Stores the application code and change history.            |
+| Supabase | Stores accounts, requests, commitments, and audit history. |
+| Your Mac | Runs the app during local development.                     |
+| Vercel   | Can host the app later and provide a public web address.   |
 
 For project details, see [Supabase setup](SUPABASE_SETUP.md). For a later public deployment, see [Vercel deployment](DEPLOYMENT.md). Use only fictional information until production access, privacy, backups, email, and recovery requirements have been reviewed.

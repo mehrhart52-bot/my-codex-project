@@ -168,7 +168,7 @@ test("registration errors preserve non-sensitive values and role, clear password
   await expect(page.getByLabel("Email Address")).toHaveValue(account.email);
 });
 
-test("worker signup → admin approval → request → supporter signup and pledge → receipt → close → admin reopen", async ({
+test("worker signup → admin approval → request → supporter commitment → close → admin reopen", async ({
   browser,
 }) => {
   const contexts = await Promise.all([
@@ -248,6 +248,13 @@ test("worker signup → admin approval → request → supporter signup and pled
       .click();
     await expect(workerPage).toHaveURL(/\/requests\/\d+\?message=/);
     const path = new URL(workerPage.url()).pathname;
+    await expect(workerPage.locator("section.card table thead th")).toHaveText([
+      "Item",
+      "Requested",
+      "Committed",
+      "Available to commit",
+    ]);
+    await expect(workerPage.getByText(/received|receipt/i)).toHaveCount(0);
     await expect(
       workerPage.getByRole("heading", { name: "Household circumstances" }),
     ).toHaveCount(0);
@@ -278,7 +285,7 @@ test("worker signup → admin approval → request → supporter signup and pled
     const card = supporterPage
       .locator("article")
       .filter({ has: supporterPage.locator(`a[href="${path}"]`) });
-    await expect(card.locator(".stats strong")).toHaveText(["3", "3", "0"]);
+    await expect(card.locator(".stats strong")).toHaveText(["3", "3"]);
 
     await login(otherPage, demos.other);
     await otherPage.goto(path);
@@ -287,16 +294,6 @@ test("worker signup → admin approval → request → supporter signup and pled
     await expect(
       otherPage.getByRole("heading", { name: "Household circumstances" }),
     ).toHaveCount(0);
-
-    await workerPage.goto(path);
-    await workerPage.getByLabel("Delivered now").fill("1");
-    await workerPage.getByRole("button", { name: "Confirm receipt" }).click();
-    await expect(
-      workerPage.getByText("Receipt recorded. Thank you."),
-    ).toBeVisible();
-    await expect(workerPage.locator("article.commitment")).toContainText(
-      "3 committed · 1 received",
-    );
 
     // Regression: administrator reduces from request detail and remains on it.
     await adminPage.goto(path);
@@ -309,30 +306,18 @@ test("worker signup → admin approval → request → supporter signup and pled
       ),
     ).toBeVisible();
     await expect(adminPage.locator("article.commitment")).toContainText(
-      "2 committed · 1 received",
+      "2 committed",
     );
 
-    // Supporter reduction still returns to My Commitments and preserves delivered units.
+    // Supporter reduction still returns to My Commitments.
     await supporterPage.goto("/commitments");
+    await expect(supporterPage.getByText(/received|receipt/i)).toHaveCount(0);
     await supporterPage.getByLabel(/New total quantity/).fill("1");
     await supporterPage
       .getByRole("button", { name: "Reduce / cancel commitment" })
       .click();
     await expect(supporterPage).toHaveURL(/\/commitments\?message=/);
-    await expect(supporterPage.locator("article")).toContainText(
-      "1 total committed · 1 received",
-    );
-    await supporterPage.goto(path);
-    await supporterPage
-      .getByLabel("Quantity of Dining Chairs to provide")
-      .fill("1");
-    await supporterPage
-      .getByRole("button", { name: "Confirm commitment" })
-      .click();
-    await expect(
-      supporterPage.getByText("Thank you! Your commitment has been saved."),
-    ).toBeVisible();
-    await supporterPage.goto("/commitments");
+    await expect(supporterPage.locator("article")).toContainText("1 committed");
     await supporterPage.getByLabel(/New total quantity/).fill("0");
     await supporterPage
       .getByRole("button", { name: "Reduce / cancel commitment" })

@@ -97,15 +97,11 @@ export default async function Requests({
                   <strong>{r.committed}</strong>
                   <span>committed</span>
                 </div>
-                <div>
-                  <strong>{r.received}</strong>
-                  <span>received</span>
-                </div>
               </div>
               <progress
                 max={Number(r.needed)}
-                value={Number(r.received)}
-                aria-label={`${r.received} of ${r.needed} items received`}
+                value={Number(r.committed)}
+                aria-label={`${r.committed} of ${r.needed} items committed`}
               />
               <Link href={`/requests/${r.id}`} className="request-link">
                 View Details <span aria-hidden="true">→</span>

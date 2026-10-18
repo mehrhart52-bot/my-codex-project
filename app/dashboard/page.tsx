@@ -43,8 +43,8 @@ export default async function Dashboard({
         <section className="card stack">
           <h2>View existing requests</h2>
           <p className="muted">
-            Review requests, track commitments, and record received items for
-            the households you support.
+            Review requests and track supporter commitments for the households
+            you support.
           </p>
           <Link className="button secondary" href="/requests">
             View Existing Requests

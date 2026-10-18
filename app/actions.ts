@@ -10,7 +10,6 @@ import {
   editRequest,
   commitItems,
   reduceCommitment,
-  receiveItems,
   changeStatus,
   updateUser,
   RuleError,
@@ -76,13 +75,6 @@ export async function action(form: FormData) {
         );
         message =
           "Commitment updated; unneeded quantities are available again.";
-      } else if (op === "receive") {
-        await receiveItems(
-          user,
-          String(form.get("commitmentId")),
-          Number(form.get("quantity")),
-        );
-        message = "Receipt recorded. Thank you.";
       } else if (op === "close" || op === "reopen") {
         await changeStatus(
           user,

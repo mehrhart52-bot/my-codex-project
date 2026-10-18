@@ -124,7 +124,7 @@ test("real Supabase Auth, permissions, inventory, audit, and concurrent pledges"
     );
 
     await t.test(
-      "request creation and dashboard totals after pledge and partial delivery",
+      "request creation and dashboard totals after a commitment",
       async () => {
         request = await rpc(worker.api, "create_request", requestArgs);
         items = (
@@ -135,32 +135,12 @@ test("real Supabase Auth, permissions, inventory, audit, and concurrent pledges"
           p_selections: [{ itemId: items[0].id, quantity: 3 }],
         });
         pledge = (await rpc(supporter.api, "my_commitments"))[0].id;
-        let rows = await rpc(supporter.api, "list_requests", {
+        const rows = await rpc(supporter.api, "list_requests", {
           p_status: "all",
           p_search: request.number,
         });
         assert.equal(rows.length, 1);
-        assert.deepEqual(
-          [rows[0].needed, rows[0].committed, rows[0].received],
-          ["6", "3", "0"],
-        );
-        await rpc(worker.api, "receive_items", {
-          p_commitment_id: pledge,
-          p_quantity: 1,
-        });
-        rows = await rpc(worker.api, "list_requests", {
-          p_status: "all",
-          p_search: request.number,
-        });
-        assert.deepEqual(
-          [rows[0].needed, rows[0].committed, rows[0].received],
-          ["6", "3", "1"],
-        );
-        const receipts = await db.query(
-          "select quantity from public.receipts where commitment_id=$1",
-          [pledge],
-        );
-        assert.equal(receipts.rows[0].quantity, 1);
+        assert.deepEqual([rows[0].needed, rows[0].committed], ["6", "3"]);
       },
     );
 
@@ -182,12 +162,6 @@ test("real Supabase Auth, permissions, inventory, audit, and concurrent pledges"
                 c.email === null &&
                 c.phone === null,
             ),
-          );
-          await denied(
-            api,
-            "receive_items",
-            { p_commitment_id: pledge, p_quantity: 1 },
-            /cannot record receipts/,
           );
           await denied(
             api,
@@ -282,20 +256,8 @@ test("real Supabase Auth, permissions, inventory, audit, and concurrent pledges"
     );
 
     await t.test(
-      "reduction, cancellation, over-receipt rejection, and atomic multi-item pledges",
+      "reduction, cancellation, and atomic multi-item commitments",
       async () => {
-        await denied(
-          worker.api,
-          "receive_items",
-          { p_commitment_id: pledge, p_quantity: 3 },
-          /exceeds the remaining/,
-        );
-        await denied(
-          supporter.api,
-          "reduce_commitment",
-          { p_commitment_id: pledge, p_quantity: 0 },
-          /quantity already received/,
-        );
         await rpc(supporter.api, "reduce_commitment", {
           p_commitment_id: pledge,
           p_quantity: 1,
@@ -303,10 +265,7 @@ test("real Supabase Auth, permissions, inventory, audit, and concurrent pledges"
         const own = (await rpc(supporter.api, "my_commitments")).find(
           (c: { id: string }) => c.id === pledge,
         );
-        assert.deepEqual(
-          [own.quantity, own.received, own.status],
-          [1, 1, "received"],
-        );
+        assert.deepEqual([own.quantity, own.status], [1, "committed"]);
         await denied(
           other.api,
           "commit_items",

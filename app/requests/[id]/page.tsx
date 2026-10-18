@@ -22,7 +22,7 @@ export default async function Detail({
   const { request: r, items, commitments, history } = data;
   const manager = canManage(user, r);
   const ready =
-    items.length > 0 && items.every((i) => i.received === i.quantity);
+    items.length > 0 && items.every((i) => i.committed >= i.quantity);
   return (
     <>
       <Link href="/requests" className="back-link">
@@ -45,7 +45,7 @@ export default async function Detail({
       </PageHead>
       {ready && manager && r.status === "open" && (
         <p className="flash success">
-          Every requested item has been received. This request is ready for
+          Every requested item has been committed. This request is ready for
           closure. Review the details and confirm below when you are ready.
         </p>
       )}
@@ -59,8 +59,8 @@ export default async function Detail({
           <section className="card">
             <h2>Household essentials</h2>
             <p className="muted">
-              Committed includes items already received. Still needed means
-              items not yet physically received.
+              Available to commit means the requested quantity that does not yet
+              have a supporter commitment.
             </p>
             <div className="table-wrap">
               <table>
@@ -69,9 +69,7 @@ export default async function Detail({
                     <th>Item</th>
                     <th>Requested</th>
                     <th>Committed</th>
-                    <th>Received</th>
                     <th>Available to commit</th>
-                    <th>Still needed</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -80,9 +78,7 @@ export default async function Detail({
                       <th>{i.name}</th>
                       <td>{i.quantity}</td>
                       <td>{i.committed}</td>
-                      <td>{i.received}</td>
                       <td>{i.quantity - i.committed}</td>
-                      <td>{i.quantity - i.received}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -91,10 +87,9 @@ export default async function Detail({
           </section>
           {manager && (
             <section className="card stack">
-              <h2>Supporter commitments & receipts</h2>
+              <h2>Supporter commitments</h2>
               <p className="muted">
                 Use these contact details only to coordinate this request.
-                Record the quantity delivered today, not the cumulative total.
               </p>
               {!commitments.length && (
                 <p className="notice">
@@ -119,49 +114,31 @@ export default async function Detail({
                     )}
                   </p>
                   <p className="muted">
-                    {c.quantity} committed · {c.received} received ·{" "}
-                    {date(c.created_at)}
+                    {c.quantity} committed · {date(c.created_at)}
                   </p>
-                  {r.status === "open" && c.status === "committed" && (
-                    <form action={action} className="inline-form">
-                      <input type="hidden" name="op" value="receive" />
-                      <input type="hidden" name="requestId" value={id} />
-                      <input type="hidden" name="commitmentId" value={c.id} />
-                      <label>
-                        Delivered now
-                        <input
-                          name="quantity"
-                          type="number"
-                          min={1}
-                          max={c.quantity - c.received}
-                          defaultValue={c.quantity - c.received}
-                          required
-                        />
-                      </label>
-                      <Submit>Confirm receipt</Submit>
-                    </form>
-                  )}
-                  {user.role === "admin" && c.status === "committed" && (
-                    <form action={action} className="inline-form">
-                      <input type="hidden" name="op" value="reduce" />
-                      <input type="hidden" name="requestId" value={id} />
-                      <input type="hidden" name="commitmentId" value={c.id} />
-                      <label>
-                        Reduce committed total
-                        <input
-                          name="quantity"
-                          type="number"
-                          min={c.received}
-                          max={c.quantity - 1}
-                          defaultValue={c.received}
-                          required
-                        />
-                      </label>
-                      <Submit className="button secondary">
-                        Update commitment
-                      </Submit>
-                    </form>
-                  )}
+                  {user.role === "admin" &&
+                    c.status === "committed" &&
+                    c.modifiable && (
+                      <form action={action} className="inline-form">
+                        <input type="hidden" name="op" value="reduce" />
+                        <input type="hidden" name="requestId" value={id} />
+                        <input type="hidden" name="commitmentId" value={c.id} />
+                        <label>
+                          Reduce committed total
+                          <input
+                            name="quantity"
+                            type="number"
+                            min={0}
+                            max={c.quantity - 1}
+                            defaultValue={0}
+                            required
+                          />
+                        </label>
+                        <Submit className="button secondary">
+                          Update commitment
+                        </Submit>
+                      </form>
+                    )}
                 </article>
               ))}
             </section>
@@ -213,8 +190,8 @@ export default async function Detail({
               <p className="muted">
                 Closing stops new commitments and preserves all history.{" "}
                 {ready
-                  ? "All requested items have been received."
-                  : "Some items have not been received. Close only if the household no longer needs further support."}
+                  ? "All requested items have commitments."
+                  : "Some items do not have commitments. Close only if the household no longer needs further support."}
               </p>
               <input type="hidden" name="op" value="close" />
               <input type="hidden" name="requestId" value={id} />

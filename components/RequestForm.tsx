@@ -77,8 +77,7 @@ export default function RequestForm({
           <label key={i.id}>
             {i.name}{" "}
             <span className="hint">
-              {i.committed} reserved, including {i.received} received. Existing
-              items are retained for history.
+              {i.committed} committed. Existing items are retained for history.
             </span>
             <input
               type="number"

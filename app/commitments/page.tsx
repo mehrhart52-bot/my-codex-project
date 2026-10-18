@@ -24,7 +24,7 @@ export default async function Commitments({
       <PageHead
         eyebrow="Your community contribution"
         title="My Commitments"
-        description="Keep track of what you have offered and what has reached a new home."
+        description="Keep track of the household items you have offered."
       />
       {!rows.length ? (
         <Empty title="Your first act of kindness is waiting">
@@ -47,29 +47,24 @@ export default async function Commitments({
                 <Badge status={c.status} />
               </div>
               <p className="muted">
-                Committed {date(c.created_at)} · {c.quantity} total committed ·{" "}
-                {c.received} received · {c.quantity - c.received} awaiting
-                delivery
+                Committed {date(c.created_at)} · {c.quantity} committed
               </p>
-              {c.status === "committed" && (
+              {c.status === "committed" && c.modifiable && (
                 <form action={action} className="inline-form">
                   <input type="hidden" name="op" value="reduce" />
                   <input type="hidden" name="commitmentId" value={c.id} />
                   <label>
                     New total quantity
                     <span className="hint">
-                      Use {c.received} to{" "}
-                      {c.received === 0
-                        ? "cancel"
-                        : "release the remaining items"}
-                      . Received items stay recorded.
+                      Enter a smaller quantity, or enter 0 to cancel this
+                      commitment.
                     </span>
                     <input
                       name="quantity"
                       type="number"
-                      min={c.received}
+                      min={0}
                       max={c.quantity - 1}
-                      defaultValue={c.received}
+                      defaultValue={0}
                       required
                     />
                   </label>
@@ -77,12 +72,6 @@ export default async function Commitments({
                     Reduce / cancel commitment
                   </Submit>
                 </form>
-              )}
-              {c.status === "received" && (
-                <p className="notice">
-                  These items have been received. This commitment is now part of
-                  your giving history.
-                </p>
               )}
             </article>
           ))}

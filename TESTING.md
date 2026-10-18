@@ -52,7 +52,7 @@ Never commit these files or paste their contents into reports.
 | Command                    | What it proves                                                                                                                                                       |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `npm run test:unit`        | Three validation/role-helper tests                                                                                                                                   |
-| `npm run test:integration` | Real Supabase Auth and API, approval, dashboard totals, inventory transactions, privacy, permissions, audit, deactivation, and competing pledges                     |
+| `npm run test:integration` | Real Supabase Auth and API, approval, dashboard totals, inventory transactions, privacy, permissions, audit, deactivation, and competing commitments                 |
 | `npm run test:browser`     | Chromium registration-error preservation, full account-switching workflow, administrator/supporter redirect behavior, login rejection, and confirmation-off behavior |
 | `npm run test:hosted`      | The same Chromium workflow against the configured hosted development project; requires its ignored settings and demo-account files                                   |
 | `npm test`                 | All three suites, sequentially; missing lab/browser prerequisites fail                                                                                               |
@@ -65,11 +65,11 @@ The browser runner starts and stops its own app server and refuses to reuse an u
 
 Fixtures use random fictional addresses/passwords and remain in this isolated lab for inspection. Tests do not erase the database. Browser selectors identify their particular request so repeated runs do not collide with earlier records.
 
-The concurrency test locks a request, starts two real HTTP pledges, verifies both are waiting in PostgreSQL, then releases the lock. Exactly one must succeed, and the final reserved quantity must not exceed demand. It does not approximate concurrency with sequential requests.
+The concurrency test locks a request, starts two real HTTP commitments, verifies both are waiting in PostgreSQL, then releases the lock. Exactly one must succeed, and the final committed quantity must not exceed demand. It does not approximate concurrency with sequential requests.
 
 ## Dashboard regression and existing databases
 
-The original `list_requests` function was reproduced with the exact ambiguous-`received` error in a fresh PostgreSQL test database. The added SQL regression failed before the fix and passed after the corrected function was applied to that database. The full Supabase integration test also checks requested/committed/received totals after a pledge and partial delivery.
+The original `list_requests` function was reproduced in a fresh PostgreSQL test database. The SQL regression and full Supabase integration test verify requested and committed totals after a supporter commitment.
 
 `tests/supabase-bootstrap.sql` creates an imitation Auth schema solely for disposable plain-PostgreSQL checks. **Never apply it to Supabase.** The main integration/browser suites use real Supabase Auth instead.
 

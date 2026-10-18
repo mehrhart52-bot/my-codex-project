@@ -51,7 +51,7 @@ begin
 
   select * into strict totals from public.list_requests('all', created ->> 'number')
     where id = v_request_id::text;
-  if totals.needed <> '2' or totals.committed <> '2' or totals.received <> '0' then
+  if totals.needed <> '2' or totals.committed <> '2' then
     raise exception 'Dashboard totals are incorrect after a pledge.';
   end if;
 
@@ -73,23 +73,12 @@ begin
   end if;
 
   perform set_config('request.jwt.claim.sub',
-    '10000000-0000-4000-8000-000000000002', true);
-  perform public.receive_items(v_commitment_id, 1);
-
-  select * into strict totals from public.list_requests('all', created ->> 'number')
-    where id = v_request_id::text;
-  if totals.needed <> '2' or totals.committed <> '2' or totals.received <> '1' then
-    raise exception 'Dashboard totals are incorrect after a partial receipt.';
-  end if;
-
-  perform set_config('request.jwt.claim.sub',
     '10000000-0000-4000-8000-000000000003', true);
   perform public.reduce_commitment(v_commitment_id, 1);
   details := public.request_details(v_request_id);
-  if details #>> '{commitments,0,status}' <> 'received' or
-      (details #>> '{commitments,0,quantity}')::integer <> 1 or
-      (details #>> '{commitments,0,received}')::integer <> 1 then
-    raise exception 'Partial receipt and reduction did not reconcile.';
+  if details #>> '{commitments,0,status}' <> 'committed' or
+      (details #>> '{commitments,0,quantity}')::integer <> 1 then
+    raise exception 'Commitment reduction did not reconcile.';
   end if;
 
   perform set_config('request.jwt.claim.sub',

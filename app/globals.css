@@ -434,10 +434,6 @@ a:focus-visible {
   background: #f6edd9;
   color: #80632d;
 }
-.badge.received {
-  background: #dfede5;
-  color: #2b6246;
-}
 .request-card h2 {
   font-size: 22px;
   line-height: 1.5;

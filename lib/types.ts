@@ -20,7 +20,6 @@ export type RequestRow = {
   owner_name: string;
   needed: string;
   committed: string;
-  received: string;
 };
 export type Item = {
   id: string;
@@ -28,15 +27,14 @@ export type Item = {
   name: string;
   quantity: number;
   committed: number;
-  received: number;
 };
 export type Commitment = {
   id: string;
   item_id: string;
   supporter_id: string;
   quantity: number;
-  received: number;
   status: string;
+  modifiable: boolean;
   created_at: Date | string;
   name: string;
   number: string;
