@@ -2,6 +2,7 @@
 import { useActionState } from "react";
 import { registerAction } from "@/app/register/actions";
 import { Submit } from "./Submit";
+import { PasswordInput } from "./PasswordInput";
 const initialState = {
   attempt: 0,
   values: {
@@ -115,8 +116,7 @@ export default function RegistrationForm() {
       <div className="two-grid">
         <label>
           Password
-          <input
-            type="password"
+          <PasswordInput
             name="password"
             aria-invalid={!!state.errors.password}
             aria-describedby="password-error"
@@ -131,9 +131,9 @@ export default function RegistrationForm() {
         </label>
         <label>
           Confirm Password
-          <input
-            type="password"
+          <PasswordInput
             name="confirmPassword"
+            visibilityLabel="confirmation password"
             aria-label="Confirm Password"
             aria-invalid={!!state.errors.confirmPassword}
             aria-describedby="confirmPassword-error"

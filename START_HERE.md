@@ -24,6 +24,8 @@ Stop the Codespace when finished; GitHub applies usage allowances and possible c
 
 You should see **Housing Transition Assistance**, a login form, and a **Create New Account** link. The local address works only while `npm run dev` is running on that Mac.
 
+When the app is connected to the shared development project, the login page shows Administrator, Social Worker, and Supporter demo buttons. Choose a role to fill its login details automatically, then select **Login**. These shortcuts appear only while running `npm run dev`; they are omitted from a production deployment.
+
 ## Stop and restart
 
 - **Stop:** select the Terminal window and press **Control+C**.
@@ -34,7 +36,7 @@ The settings are stored in `.env.local` inside the project folder and excluded f
 
 ## Demo accounts
 
-Codex created four fictional hosted accounts: administrator, approved social worker, supporter, and another supporter. Their random passwords are stored only in the secure, Git-ignored file `.local/hosted-demo-accounts.json` in the Codex workspace. Save the details in your password manager before this cloud workspace is discarded.
+Codex created four fictional hosted accounts: administrator, approved social worker, supporter, and another supporter. The three main roles are available through the local login-page shortcuts, so their passwords do not need to be copied from a credentials document.
 
 The app also allows you to register more fictional accounts. Social workers require administrator approval before they can create requests. Ordinary registration cannot create an administrator.
 
