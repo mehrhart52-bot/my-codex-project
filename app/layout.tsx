@@ -40,7 +40,7 @@ export default async function Layout({
                 unoptimized
               />
               <span className="brand-name">
-                Housing Transition<span>Assistance · Syracuse, NY</span>
+                Housing Transition Assistance<span>Syracuse, NY</span>
               </span>
             </Link>
             <nav aria-label="Main navigation">
