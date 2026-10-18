@@ -199,14 +199,22 @@ if (mode === "list") {
         `select count(*)::int as requests from public.requests where owner_id='${data.user.id}' and summary='Fictional practice household: two chairs and a lamp for a fresh start.';`,
       );
       if (existingRequest[0].requests === 0) {
+        const catalogRows = await query(
+          "select id, name from public.catalog where name in ('Dining Chairs', 'Lamp');",
+        );
+        const catalogIds = Object.fromEntries(
+          catalogRows.map((item) => [item.name, item.id]),
+        );
+        if (!catalogIds["Dining Chairs"] || !catalogIds.Lamp)
+          throw new Error("Hosted demo request catalog items are missing.");
         const result = await api.rpc("create_request", {
           p_summary:
             "Fictional practice household: two chairs and a lamp for a fresh start.",
           p_narrative:
             "Fictional private circumstances for the assigned worker. No real client information.",
           p_items: [
-            { catalogId: 15, quantity: 2 },
-            { catalogId: 13, quantity: 1 },
+            { catalogId: catalogIds["Dining Chairs"], quantity: 2 },
+            { catalogId: catalogIds.Lamp, quantity: 1 },
           ],
         });
         if (result.error)

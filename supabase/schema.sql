@@ -20,11 +20,13 @@ create table if not exists public.catalog (
 );
 
 insert into public.catalog(name) values
-  ('Bed'), ('Mattress'), ('Bed Frame'), ('Bedding'), ('Pillows'),
+  ('Twin Mattress'), ('Full Mattress'),
+  ('Twin Bed Frame'), ('Full Bed Frame'),
+  ('Twin Bedding'), ('Full Bedding'), ('Pillows'),
   ('Dishes'), ('Glasses'), ('Silverware'), ('Pots and Pans'),
   ('Cooking Utensils'), ('Microwave'), ('Television'), ('Lamp'),
   ('Kitchen Table'), ('Dining Chairs'), ('Sofa'), ('Coffee Table'),
-  ('End Table'), ('Dresser'), ('Towels'), ('Other')
+  ('End Table'), ('Dresser'), ('Towels'), ('Cleaning Supplies'), ('Other')
 on conflict (name) do nothing;
 
 create table if not exists public.requests (

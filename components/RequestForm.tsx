@@ -2,19 +2,35 @@
 import { useState } from "react";
 import { action } from "@/app/actions";
 import { Submit } from "./Submit";
+import type { CatalogItem } from "@/lib/service";
 import type { Item } from "@/lib/types";
-type Row = { key: number; catalogId: number; name: string; quantity: number };
+type Row = {
+  key: number;
+  catalogId: number;
+  optionName: string;
+  name: string;
+  quantity: number;
+};
+
+function rowForCatalog(key: number, item: CatalogItem): Row {
+  return {
+    key,
+    catalogId: item.id,
+    optionName: item.name,
+    name: item.customName ?? "",
+    quantity: 1,
+  };
+}
+
 export default function RequestForm({
   catalog,
   initial,
 }: {
-  catalog: { id: number; name: string }[];
+  catalog: CatalogItem[];
   initial?: { id: string; summary: string; items: Item[] };
 }) {
   const [rows, setRows] = useState<Row[]>(
-    initial
-      ? []
-      : [{ key: 0, catalogId: catalog[0].id, name: "", quantity: 1 }],
+    initial ? [] : [rowForCatalog(0, catalog[0])],
   );
   const [nextKey, setNextKey] = useState(1);
   const [existing, setExisting] = useState(
@@ -90,19 +106,26 @@ export default function RequestForm({
               Item {index + 1}
               <select
                 aria-label={`Item ${index + 1}`}
-                value={r.catalogId}
-                onChange={(e) =>
-                  update(r.key, { catalogId: Number(e.target.value) })
-                }
+                value={r.optionName}
+                onChange={(e) => {
+                  const selected = catalog.find(
+                    (item) => item.name === e.target.value,
+                  )!;
+                  update(r.key, {
+                    catalogId: selected.id,
+                    optionName: selected.name,
+                    name: selected.customName ?? "",
+                  });
+                }}
               >
                 {catalog.map((c) => (
-                  <option key={c.id} value={c.id}>
+                  <option key={`${c.id}:${c.name}`} value={c.name}>
                     {c.name}
                   </option>
                 ))}
               </select>
             </label>
-            {catalog.find((c) => c.id === r.catalogId)?.name === "Other" && (
+            {r.optionName === "Other" && (
               <label>
                 Specify item
                 <input
@@ -141,10 +164,7 @@ export default function RequestForm({
           type="button"
           className="button secondary"
           onClick={() => {
-            setRows([
-              ...rows,
-              { key: nextKey, catalogId: catalog[0].id, name: "", quantity: 1 },
-            ]);
+            setRows([...rows, rowForCatalog(nextKey, catalog[0])]);
             setNextKey(nextKey + 1);
           }}
         >

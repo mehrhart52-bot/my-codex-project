@@ -220,14 +220,23 @@ if (mode === "stop") {
           ],
         );
         if (!rows.length) {
+          const { rows: catalogRows } = await db.query(
+            "select id, name from public.catalog where name = any($1::text[])",
+            [["Dining Chairs", "Lamp"]],
+          );
+          const catalogIds = Object.fromEntries(
+            catalogRows.map((item) => [item.name, item.id]),
+          );
+          if (!catalogIds["Dining Chairs"] || !catalogIds.Lamp)
+            throw new Error("Demo request catalog items are missing.");
           const result = await worker.rpc("create_request", {
             p_summary:
               "Fictional practice household: two chairs and a lamp for a fresh start.",
             p_narrative:
               "Fictional private context for the assigned worker. No real client information.",
             p_items: [
-              { catalogId: 15, quantity: 2 },
-              { catalogId: 13, quantity: 1 },
+              { catalogId: catalogIds["Dining Chairs"], quantity: 2 },
+              { catalogId: catalogIds.Lamp, quantity: 1 },
             ],
           });
           if (result.error)

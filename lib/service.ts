@@ -177,14 +177,82 @@ export async function myCommitments(_user: User): Promise<Commitment[]> {
   return rpc<Commitment[]>("my_commitments");
 }
 
-export async function catalog(): Promise<{ id: number; name: string }[]> {
+const catalogOrder = [
+  "Twin Mattress",
+  "Full Mattress",
+  "Twin Bed Frame",
+  "Full Bed Frame",
+  "Twin Bedding",
+  "Full Bedding",
+  "Pillows",
+  "Dishes",
+  "Glasses",
+  "Silverware",
+  "Pots and Pans",
+  "Cooking Utensils",
+  "Microwave",
+  "Television",
+  "Lamp",
+  "Kitchen Table",
+  "Dining Chairs",
+  "Sofa",
+  "Coffee Table",
+  "End Table",
+  "Dresser",
+  "Towels",
+  "Cleaning Supplies",
+  "Other",
+];
+
+const retiredCatalogItems = new Set([
+  "Bed",
+  "Mattress",
+  "Bed Frame",
+  "Bedding",
+]);
+
+const compatibleCustomItems = catalogOrder.filter(
+  (name) =>
+    name.includes("Mattress") ||
+    name.includes("Bed Frame") ||
+    name.includes("Bedding") ||
+    name === "Cleaning Supplies",
+);
+
+export type CatalogItem = {
+  id: number;
+  name: string;
+  customName?: string;
+};
+
+export function visibleCatalog(rows: CatalogItem[]): CatalogItem[] {
+  const position = new Map(catalogOrder.map((name, index) => [name, index]));
+  const visible = rows.filter((row) => !retiredCatalogItems.has(row.name));
+  const other = visible.find((row) => row.name === "Other");
+
+  if (other) {
+    for (const name of compatibleCustomItems) {
+      if (!visible.some((row) => row.name === name)) {
+        visible.push({ id: other.id, name, customName: name });
+      }
+    }
+  }
+
+  return visible.sort(
+    (left, right) =>
+      (position.get(left.name) ?? catalogOrder.length - 1) -
+      (position.get(right.name) ?? catalogOrder.length - 1),
+  );
+}
+
+export async function catalog(): Promise<CatalogItem[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("catalog")
     .select("id,name")
     .order("id");
   if (error) throw new RuleError(cleanMessage(error.message));
-  return data ?? [];
+  return visibleCatalog(data ?? []);
 }
 
 export async function adminData() {

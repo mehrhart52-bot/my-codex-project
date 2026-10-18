@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { registration } from "../lib/accounts";
-import { itemInput, requestInput } from "../lib/service";
+import { itemInput, requestInput, visibleCatalog } from "../lib/service";
 import { canCreate, canManage, type User } from "../lib/types";
 
 const baseRegistration = {
@@ -39,6 +39,36 @@ test("request and item validation enforce useful descriptions and whole quantiti
   assert.throws(() => requestInput.parse({ ...valid, items: [] }));
   assert.throws(() => itemInput.parse({ catalogId: 1, quantity: 1.5 }));
   assert.throws(() => itemInput.parse({ catalogId: 1, quantity: 0 }));
+});
+
+test("catalog presents the revised household essentials in a useful order", () => {
+  const rows = [
+    { id: 1, name: "Bed" },
+    { id: 2, name: "Mattress" },
+    { id: 3, name: "Cleaning Supplies" },
+    { id: 4, name: "Full Bedding" },
+    { id: 5, name: "Twin Mattress" },
+    { id: 6, name: "Other" },
+  ];
+
+  const catalog = visibleCatalog(rows);
+  assert.deepEqual(
+    catalog.map(({ name }) => name),
+    [
+      "Twin Mattress",
+      "Full Mattress",
+      "Twin Bed Frame",
+      "Full Bed Frame",
+      "Twin Bedding",
+      "Full Bedding",
+      "Cleaning Supplies",
+      "Other",
+    ],
+  );
+  assert.deepEqual(
+    catalog.find(({ name }) => name === "Full Mattress"),
+    { id: 6, name: "Full Mattress", customName: "Full Mattress" },
+  );
 });
 
 test("role helpers require approval and request ownership", () => {

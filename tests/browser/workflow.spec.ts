@@ -206,6 +206,35 @@ test("worker signup → admin approval → request → supporter signup and pled
     await workerPage
       .getByRole("link", { name: "＋ Create New Request", exact: true })
       .click();
+    const itemSelect = workerPage.getByLabel("Item 1", { exact: true });
+    await expect(itemSelect).toBeVisible();
+    const itemChoices = await itemSelect.locator("option").allTextContents();
+    expect(itemChoices).toEqual([
+      "Twin Mattress",
+      "Full Mattress",
+      "Twin Bed Frame",
+      "Full Bed Frame",
+      "Twin Bedding",
+      "Full Bedding",
+      "Pillows",
+      "Dishes",
+      "Glasses",
+      "Silverware",
+      "Pots and Pans",
+      "Cooking Utensils",
+      "Microwave",
+      "Television",
+      "Lamp",
+      "Kitchen Table",
+      "Dining Chairs",
+      "Sofa",
+      "Coffee Table",
+      "End Table",
+      "Dresser",
+      "Towels",
+      "Cleaning Supplies",
+      "Other",
+    ]);
     const summary =
       "Fictional browser exercise: dining chairs for a fresh start.";
     await workerPage.getByLabel(/Public summary/).fill(summary);
