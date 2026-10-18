@@ -99,7 +99,7 @@ em {
   align-items: center;
   justify-content: space-between;
   gap: 25px;
-  padding: 24px 32px;
+  padding: 16px 32px;
 }
 .brand {
   display: flex;
@@ -109,12 +109,12 @@ em {
     20px/1.15 Arial,
     sans-serif;
   font-weight: 600;
-  flex-shrink: 0;
+  min-width: 0;
 }
 .brand:hover {
   text-decoration: none;
 }
-.brand span span {
+.brand-name span {
   display: block;
   font:
     10px/1.8 Arial,
@@ -124,14 +124,16 @@ em {
   font-weight: 400;
   margin-top: 5px;
 }
-.brand-mark {
-  font-size: 40px;
-  border: 1px solid #dedede;
-  border-radius: 50% 50% 6px 6px;
-  width: 48px;
-  height: 52px;
-  text-align: center;
-  color: var(--brand-red);
+.brand-logo {
+  display: block;
+  width: 240px;
+  height: auto;
+  flex-shrink: 0;
+}
+.brand-name {
+  border-left: 1px solid var(--line);
+  padding-left: 20px;
+  white-space: nowrap;
 }
 nav {
   display: flex;
@@ -690,7 +692,18 @@ td code {
     padding: 20px;
   }
   .brand {
-    font-size: 20px;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 18px;
+    text-align: center;
+  }
+  .brand-logo {
+    width: 220px;
+    max-width: 100%;
+  }
+  .brand-name {
+    border-left: 0;
+    padding-left: 0;
   }
   nav {
     justify-content: center;

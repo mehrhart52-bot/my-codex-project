@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { currentUser } from "@/lib/auth";
 import { canCreate } from "@/lib/types";
 import { action } from "./actions";
@@ -29,10 +30,16 @@ export default async function Layout({
         <header className="site-header">
           <div className="nav-wrap">
             <Link href="/" className="brand">
-              <span className="brand-mark" aria-hidden="true">
-                ⌂
-              </span>
-              <span>
+              <Image
+                src="/branding/rescue-mission-logo.jpg"
+                alt="Rescue Mission"
+                width={640}
+                height={278}
+                className="brand-logo"
+                preload
+                unoptimized
+              />
+              <span className="brand-name">
                 Housing Transition<span>Assistance · Syracuse, NY</span>
               </span>
             </Link>
