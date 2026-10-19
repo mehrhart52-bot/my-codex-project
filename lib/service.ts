@@ -1,6 +1,20 @@
 import { z } from "zod";
 import { createClient } from "./supabase/server";
-import type { Commitment, Item, RequestRow, User } from "./types";
+import { canManage } from "./types";
+import {
+  contactFromUser,
+  readRequestSummary,
+  summaryLimit,
+  summaryWithContact,
+  type WorkerContact,
+} from "./request-contact";
+import type {
+  Commitment,
+  Item,
+  RequestDetail,
+  RequestRow,
+  User,
+} from "./types";
 
 export class RuleError extends Error {}
 
@@ -47,10 +61,27 @@ async function rpc<T>(name: string, params: Record<string, unknown> = {}) {
   return data as T;
 }
 
-export async function createRequest(_user: User, input: unknown) {
+function publicDescription(summary: string, contact: WorkerContact) {
+  check(
+    summary.length <= summaryLimit(contact),
+    `Shorten the public summary to ${summaryLimit(contact)} characters to include the worker's contact details.`,
+  );
+  return summaryWithContact(summary, contact);
+}
+
+export async function requestOwnerContact(user: User, ownerId: string) {
+  if (user.id === ownerId) return contactFromUser(user);
+  check(user.role === "admin", "You cannot edit this request.");
+  const profiles = await rpc<User[]>("admin_users");
+  const owner = profiles.find((profile) => profile.id === ownerId);
+  if (!owner) throw new RuleError("The submitting worker could not be found.");
+  return contactFromUser(owner);
+}
+
+export async function createRequest(user: User, input: unknown) {
   const data = requestInput.parse(input);
   return rpc<{ id: string; number: string }>("create_request", {
-    p_summary: data.summary,
+    p_summary: publicDescription(data.summary, contactFromUser(user)),
     p_narrative: emptyNarrative,
     p_items: data.items,
   });
@@ -66,12 +97,16 @@ export async function editRequest(_user: User, id: string, input: unknown) {
     .parse(input);
 
   const existing = await requestDetails(_user, id);
+  if (!existing || !canManage(_user, existing.request)) {
+    throw new RuleError("You cannot edit this request.");
+  }
   const narrative = narrativeInput.safeParse(existing?.request.narrative);
   check(narrative.success, "Request details could not be read.");
+  const contact = await requestOwnerContact(_user, existing.request.owner_id);
 
   await rpc("edit_request", {
     p_request_id: validId(id),
-    p_summary: data.summary,
+    p_summary: publicDescription(data.summary, contact),
     p_narrative: narrative.data,
     p_items: data.items,
     p_new_items: data.newItems,
@@ -156,12 +191,15 @@ export async function listRequests(
       p_search: search.slice(0, 120),
     },
   );
-  return rows.map(({ received: _legacyReceived, ...row }) => row);
+  return rows.map(({ received: _legacyReceived, ...row }) => ({
+    ...row,
+    summary: readRequestSummary(row.summary, row.owner_id).summary,
+  }));
 }
 
 export async function requestDetails(_user: User, id: string) {
   const data = await rpc<{
-    request: RequestRow;
+    request: RequestDetail;
     items: (Item & { received?: number })[];
     commitments: (Omit<Commitment, "modifiable"> & {
       received?: number;
@@ -169,8 +207,19 @@ export async function requestDetails(_user: User, id: string) {
     history: { action: string; details: unknown; created_at: string }[];
   } | null>("request_details", { p_request_id: validId(id) });
   if (!data) return null;
+  const { summary, contact } = readRequestSummary(
+    data.request.summary,
+    data.request.owner_id,
+  );
   return {
     ...data,
+    request: {
+      ...data.request,
+      summary,
+      owner_name: contact?.name ?? data.request.owner_name,
+      owner_email: contact?.email,
+      owner_phone: contact?.phone,
+    },
     items: data.items.map(({ received: _legacyReceived, ...item }) => item),
     commitments: data.commitments.map(
       ({ received: _legacyReceived, ...commitment }) => ({

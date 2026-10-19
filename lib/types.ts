@@ -28,6 +28,10 @@ export type Item = {
   quantity: number;
   committed: number;
 };
+export type RequestDetail = RequestRow & {
+  owner_email?: string;
+  owner_phone?: string;
+};
 export type Commitment = {
   id: string;
   item_id: string;

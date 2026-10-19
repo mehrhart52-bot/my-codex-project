@@ -32,7 +32,37 @@ export default async function Detail({
       <PageHead
         eyebrow={`${r.number} · Created ${date(r.created_at)}`}
         title="A home in the making"
-        description={r.owner_name ? `Requested by ${r.owner_name}` : undefined}
+        description={
+          r.owner_name ? (
+            <>
+              Requested by {r.owner_name}
+              {(r.owner_email || r.owner_phone) && (
+                <span className="worker-contact">
+                  Phone:{" "}
+                  {r.owner_phone && /\d/.test(r.owner_phone) ? (
+                    <a
+                      className="text-link"
+                      href={`tel:${r.owner_phone.replace(/[^\d+]/g, "")}`}
+                    >
+                      {r.owner_phone}
+                    </a>
+                  ) : (
+                    "Not provided"
+                  )}
+                  <br />
+                  Email:{" "}
+                  {r.owner_email ? (
+                    <a className="text-link" href={`mailto:${r.owner_email}`}>
+                      {r.owner_email}
+                    </a>
+                  ) : (
+                    "Not provided"
+                  )}
+                </span>
+              )}
+            </>
+          ) : undefined
+        }
       >
         <div className="actions">
           <Badge status={r.status} />

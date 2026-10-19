@@ -239,6 +239,7 @@ test("worker signup → admin approval → request → supporter commitment → 
     await expect(itemSelect).toBeVisible();
     const itemChoices = await itemSelect.locator("option").allTextContents();
     expect(itemChoices).toEqual([
+      "Select an item...",
       "Twin Mattress",
       "Full Mattress",
       "Twin Bed Frame",
@@ -301,6 +302,19 @@ test("worker signup → admin approval → request → supporter commitment → 
 
     await register(supporterPage, supporter);
     await supporterPage.goto(path);
+    const deliveryContact = supporterPage.locator(".page-head");
+    await expect(
+      deliveryContact.getByRole("link", { name: worker.email }),
+    ).toHaveAttribute("href", `mailto:${worker.email}`);
+    await expect(
+      deliveryContact.getByRole("link", { name: "315-555-0123" }),
+    ).toHaveAttribute("href", "tel:3155550123");
+    await expect(deliveryContact).toContainText(
+      "Requested by Fictional Tester",
+    );
+    await expect(
+      supporterPage.getByRole("heading", { name: "Arrange delivery" }),
+    ).toHaveCount(0);
     await supporterPage
       .getByLabel("Quantity of Dining Chairs to provide")
       .fill("3");
@@ -321,11 +335,26 @@ test("worker signup → admin approval → request → supporter commitment → 
     const unrelatedHtml = await otherPage.content();
     expect(unrelatedHtml.includes(supporter.email)).toBe(false);
     await expect(
+      otherPage.locator(".page-head").getByRole("link", { name: worker.email }),
+    ).toBeVisible();
+    await expect(
       otherPage.getByRole("heading", { name: "Household circumstances" }),
     ).toHaveCount(0);
 
     // Regression: administrator reduces from request detail and remains on it.
     await adminPage.goto(path);
+    await adminPage.getByRole("link", { name: "Edit request" }).click();
+    await expect(adminPage.getByLabel(/Public summary/)).toHaveValue(summary);
+    await adminPage.getByRole("button", { name: "Save request" }).click();
+    await expect(adminPage).toHaveURL(new RegExp(path + "\\?message="));
+    await expect(
+      adminPage.locator(".page-head").getByRole("link", { name: worker.email }),
+    ).toBeVisible();
+    await expect(
+      adminPage
+        .locator(".page-head")
+        .getByRole("link", { name: demos.admin.email }),
+    ).toHaveCount(0);
     await adminPage.getByLabel("Reduce committed total").fill("2");
     await adminPage.getByRole("button", { name: "Update commitment" }).click();
     await expect(adminPage).toHaveURL(new RegExp(path + "\\?message="));

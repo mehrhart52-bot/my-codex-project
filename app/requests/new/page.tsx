@@ -1,6 +1,7 @@
 import { requireUser } from "@/lib/auth";
 import { canCreate } from "@/lib/types";
 import { catalog } from "@/lib/service";
+import { contactFromUser, summaryLimit } from "@/lib/request-contact";
 import { Flash, PageHead, date, type Params } from "@/components/ui";
 import RequestForm from "@/components/RequestForm";
 export default async function NewRequest({
@@ -44,7 +45,10 @@ export default async function NewRequest({
               <p className="hint">Open</p>
             </div>
           </section>
-          <RequestForm catalog={await catalog()} />
+          <RequestForm
+            catalog={await catalog()}
+            summaryMaxLength={summaryLimit(contactFromUser(user))}
+          />
         </div>
       ) : (
         <div className="notice">

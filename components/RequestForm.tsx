@@ -25,9 +25,11 @@ function emptyRow(key: number): Row {
 export default function RequestForm({
   catalog,
   initial,
+  summaryMaxLength = 2000,
 }: {
   catalog: CatalogItem[];
   initial?: { id: string; summary: string; items: Item[] };
+  summaryMaxLength?: number;
 }) {
   const [rows, setRows] = useState<Row[]>(initial ? [] : [emptyRow(0)]);
   const [nextKey, setNextKey] = useState(1);
@@ -57,12 +59,16 @@ export default function RequestForm({
             name="summary"
             required
             minLength={10}
-            maxLength={2000}
+            maxLength={summaryMaxLength}
             rows={3}
             defaultValue={initial?.summary}
             placeholder="A neighbor is moving into their first apartment and needs a few essentials to settle in."
           />
         </label>
+        <p className="hint">
+          The submitting worker's name, phone number, and email are shared with
+          supporters for delivery coordination when this request is saved.
+        </p>
       </section>
       <section className="card stack">
         <div>

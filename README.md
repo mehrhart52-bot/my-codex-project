@@ -35,6 +35,10 @@ New projects use [supabase/schema.sql](supabase/schema.sql). Existing projects a
 
 All application mutations use database functions that verify the current account and role. Inventory operations lock the request to prevent competing commitments from exceeding demand. Row-level security and table permissions prevent direct reads of private request data. Owners and administrators can see private narratives; supporters receive public summaries and their own commitments.
 
+Signed-in request viewers can see the submitting worker's phone number and email address directly below their name on request details. Email and phone links let supporters coordinate delivery with the worker.
+
+New requests save a snapshot of the submitting worker's contact details with the existing public description. Saving a request again refreshes that snapshot from the worker's profile, including when an administrator edits it. Older requests are left untouched. No Supabase schema, permission, or token changes are required. The app reserves room for the contact details within the existing description length limit.
+
 The app uses only a publishable/anon key. It never uses the management token or a service-role key. The optional isolated test-lab tooling uses local administrative credentials to prepare fictional fixtures.
 
 [Later Vercel deployment](DEPLOYMENT.md) is separate from first-run testing. This stack does not establish healthcare or privacy compliance. Password recovery is not implemented.

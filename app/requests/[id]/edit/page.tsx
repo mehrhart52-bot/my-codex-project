@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth";
 import { canManage } from "@/lib/types";
-import { catalog, requestDetails } from "@/lib/service";
+import { catalog, requestDetails, requestOwnerContact } from "@/lib/service";
+import { summaryLimit } from "@/lib/request-contact";
 import { Flash, PageHead, type Params } from "@/components/ui";
 import RequestForm from "@/components/RequestForm";
 export default async function Edit({
@@ -24,6 +25,9 @@ export default async function Edit({
       {r.status === "open" ? (
         <RequestForm
           catalog={await catalog()}
+          summaryMaxLength={summaryLimit(
+            await requestOwnerContact(user, r.owner_id),
+          )}
           initial={{
             id: r.id,
             summary: r.summary,
