@@ -14,7 +14,7 @@ const demoAccounts = [
     password: "RescueAdmin2026!",
   },
   {
-    label: "Social worker",
+    label: "Social Worker",
     email: "demo-worker@example.com",
     password: "RescueWorker2026!",
   },
@@ -28,10 +28,10 @@ const demoAccounts = [
 export default function LoginScreen({ params }: { params: Params }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL?.replace(/\/+$/, "");
   const showDemoAccounts =
     process.env.NODE_ENV === "development" &&
-    process.env.NEXT_PUBLIC_SUPABASE_URL ===
-      "https://naxlbpsjoonktjbieyft.supabase.co";
+    supabaseUrl === "https://naxlbpsjoonktjbieyft.supabase.co";
 
   return (
     <div className="auth-shell">
@@ -41,6 +41,32 @@ export default function LoginScreen({ params }: { params: Params }) {
       <Flash params={params} />
       <form action={action} className="card stack">
         <input type="hidden" name="op" value="login" />
+        {showDemoAccounts && (
+          <section className="stack demo-access" aria-labelledby="demo-title">
+            <div>
+              <p className="eyebrow">Local testing</p>
+              <h2 id="demo-title">Use a demo account</h2>
+              <p className="muted">
+                Select a role to fill in its login details, then select Login.
+              </p>
+            </div>
+            <div className="actions">
+              {demoAccounts.map((account) => (
+                <button
+                  key={account.email}
+                  type="button"
+                  className="button secondary small"
+                  onClick={() => {
+                    setEmail(account.email);
+                    setPassword(account.password);
+                  }}
+                >
+                  Use {account.label} Demo
+                </button>
+              ))}
+            </div>
+          </section>
+        )}
         <label>
           Email address
           <input
@@ -69,33 +95,6 @@ export default function LoginScreen({ params }: { params: Params }) {
           Need account access help? Contact your organization’s administrator.
         </p>
       </form>
-      {showDemoAccounts && (
-        <section className="card stack demo-access">
-          <div>
-            <p className="eyebrow">Local testing</p>
-            <h2>Use a demo account</h2>
-            <p className="muted">
-              Choose a role to fill in its email and password, then select
-              Login. These shortcuts appear only during local development.
-            </p>
-          </div>
-          <div className="actions">
-            {demoAccounts.map((account) => (
-              <button
-                key={account.email}
-                type="button"
-                className="button secondary small"
-                onClick={() => {
-                  setEmail(account.email);
-                  setPassword(account.password);
-                }}
-              >
-                Use {account.label} Demo
-              </button>
-            ))}
-          </div>
-        </section>
-      )}
       <p className="muted">
         New here?{" "}
         <Link className="text-link" href="/register">

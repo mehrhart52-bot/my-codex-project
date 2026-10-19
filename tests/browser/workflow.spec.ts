@@ -71,7 +71,15 @@ test("entry shows login and registration, protects requests, and supports a narr
   await page.getByRole("button", { name: "Hide password" }).click();
   await expect(password).toHaveAttribute("type", "password");
   if (hosted) {
-    await page.getByRole("button", { name: "Use Administrator Demo" }).click();
+    const demoButton = page.getByRole("button", {
+      name: "Use Administrator Demo",
+    });
+    const demoBox = await demoButton.boundingBox();
+    const emailBox = await page
+      .getByLabel("Email address", { exact: true })
+      .boundingBox();
+    expect(demoBox?.y).toBeLessThan(emailBox?.y ?? 0);
+    await demoButton.click();
     await expect(page.getByLabel("Email address", { exact: true })).toHaveValue(
       demos.admin.email,
     );

@@ -82,7 +82,16 @@ button:disabled {
   stroke-linejoin: round;
 }
 .demo-access {
-  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  background: var(--cream);
+}
+.demo-access h2 {
+  font-size: 20px;
+}
+.demo-access .actions {
+  gap: 8px;
 }
 h1,
 h2,
