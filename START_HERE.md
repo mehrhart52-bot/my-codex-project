@@ -24,7 +24,7 @@ Stop the Codespace when finished; GitHub applies usage allowances and possible c
 
 You should see **Housing Transition Assistance**, a login form, and a **Create New Account** link. The local address works only while `npm run dev` is running on that Mac.
 
-When the app is connected to the shared development project, the login page shows Administrator, Social Worker, and Supporter demo buttons. Choose a role to fill its login details automatically, then select **Login**. These shortcuts appear only while running `npm run dev`; they are omitted from a production deployment.
+Enter your email address and password, then select **Login**. The eye beside the password lets you check what you typed. Demo accounts use this same form as real accounts; there are no demo login buttons.
 
 ## Stop and restart
 
@@ -36,7 +36,17 @@ The settings are stored in `.env.local` inside the project folder and excluded f
 
 ## Demo accounts
 
-Codex created four fictional hosted accounts: administrator, approved social worker, supporter, and another supporter. The three main roles are available through the local login-page shortcuts, so their passwords do not need to be copied from a credentials document.
+Use these accounts with the fictional development project (`naxlbpsjoonktjbieyft`). Each uses the same password: **`RescueDemo2026!`** (capital **R** and **D**, with an exclamation mark at the end).
+
+| Role          | Email address                |
+| ------------- | ---------------------------- |
+| Administrator | `demo-admin@example.com`     |
+| Social Worker | `demo-worker@example.com`    |
+| Supporter     | `demo-supporter@example.com` |
+
+Type the email and password into the login form and select **Login**. Replace any old password saved by your browser. These credentials are only for fictional development testing; a separate production Supabase project needs its own accounts and private passwords.
+
+Downloading the code does not create these accounts in another Supabase project. If sign-in fails, check that `.env.local` points to the development project above and uses that project's publishable key. Never share secret or service-role keys.
 
 The app also allows you to register more fictional accounts. Social workers require administrator approval before they can create requests. Ordinary registration cannot create an administrator.
 

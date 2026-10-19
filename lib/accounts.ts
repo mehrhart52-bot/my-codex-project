@@ -66,7 +66,7 @@ export async function authenticate(
     password,
   });
 
-  if (error) throw new RuleError("Email or password is incorrect.");
+  if (error) throw new RuleError(signInErrorMessage(error));
 
   const {
     data: { user },
@@ -82,4 +82,17 @@ export async function authenticate(
       "This account is unavailable. Contact an administrator.",
     );
   }
+}
+
+export function signInErrorMessage(error: { code?: string; status?: number }) {
+  if (error.code === "invalid_credentials") {
+    return "Email or password is incorrect.";
+  }
+  if (error.status === 429) {
+    return "Too many sign-in attempts. Please wait a few minutes and try again.";
+  }
+  if (error.code === "email_not_confirmed") {
+    return "Please confirm your email address before signing in.";
+  }
+  return "The sign-in service is unavailable. Please try again later or contact your administrator.";
 }

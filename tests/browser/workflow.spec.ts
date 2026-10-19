@@ -70,16 +70,6 @@ test("entry shows login and registration, protects requests, and supports a narr
   await expect(password).toHaveAttribute("type", "text");
   await page.getByRole("button", { name: "Hide password" }).click();
   await expect(password).toHaveAttribute("type", "password");
-  if (hosted) {
-    const demoButton = page.getByRole("button", {
-      name: "Use Administrator Demo",
-    });
-    const demoBox = await demoButton.boundingBox();
-    const emailBox = await page
-      .getByLabel("Email address", { exact: true })
-      .boundingBox();
-    expect(demoBox?.y).toBeLessThan(emailBox?.y ?? 0);
-  }
   await expect(
     page.getByRole("link", { name: "View Existing Requests" }),
   ).toHaveCount(0);
@@ -101,17 +91,23 @@ test("entry shows login and registration, protects requests, and supports a narr
   await expect(page).toHaveURL(/\/login$/);
 });
 
-test("demo shortcuts sign in without typing credentials", async ({ page }) => {
-  test.skip(!hosted, "Hosted demo accounts are not available in the local lab");
-
-  for (const role of ["Administrator", "Social Worker", "Supporter"]) {
+test("all demo roles can sign in using the manual login form", async ({
+  page,
+}) => {
+  for (const role of ["admin", "worker", "supporter"]) {
     await page.goto("/login");
-    await page.getByRole("button", { name: `Use ${role} Demo` }).click();
-    await expect(page).toHaveURL(
-      role === "Social Worker"
-        ? /\/dashboard\?message=/
-        : /\/requests\?message=/,
+    await expect(page.getByRole("button", { name: /Use .* Demo/ })).toHaveCount(
+      0,
     );
+    await login(page, {
+      ...demos[role],
+      role: role === "worker" ? "social_worker" : role,
+    });
+    if (role === "admin") {
+      await expect(
+        page.getByRole("link", { name: "Administration", exact: true }),
+      ).toBeVisible();
+    }
     await page.getByRole("button", { name: "Logout" }).click();
     await expect(page).toHaveURL(/\/\?message=/);
   }

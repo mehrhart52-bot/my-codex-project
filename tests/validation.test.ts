@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { registration } from "../lib/accounts";
+import { registration, signInErrorMessage } from "../lib/accounts";
 import { itemInput, requestInput, visibleCatalog } from "../lib/service";
 import { canCreate, canManage, type User } from "../lib/types";
 
@@ -13,6 +13,21 @@ const baseRegistration = {
   password: "a-secure-test-password",
   confirmPassword: "a-secure-test-password",
 };
+
+test("login distinguishes incorrect credentials from service failures", () => {
+  assert.equal(
+    signInErrorMessage({ code: "invalid_credentials", status: 400 }),
+    "Email or password is incorrect.",
+  );
+  for (const status of [0, 401, 500, 503]) {
+    assert.match(signInErrorMessage({ status }), /service is unavailable/);
+  }
+  assert.match(signInErrorMessage({ status: 429 }), /wait a few minutes/);
+  assert.match(
+    signInErrorMessage({ code: "email_not_confirmed", status: 400 }),
+    /confirm your email/,
+  );
+});
 
 test("registration accepts supporters and pending social workers only", () => {
   assert.equal(registration.parse(baseRegistration).role, "supporter");
