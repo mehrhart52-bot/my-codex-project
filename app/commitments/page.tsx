@@ -24,7 +24,7 @@ export default async function Commitments({
       <PageHead
         eyebrow="Your community contribution"
         title="My Commitments"
-        description="Keep track of the household items you have offered."
+        description="Keep track of items you have offered. Open the request for the worker’s contact details and arrange delivery directly."
       />
       {!rows.length ? (
         <Empty title="Your first act of kindness is waiting">
@@ -40,7 +40,7 @@ export default async function Commitments({
                     className="text-link"
                     href={`/requests/${c.request_id}`}
                   >
-                    {c.number}
+                    {c.number} · View request &amp; worker contact
                   </Link>
                   <h2>{c.name}</h2>
                 </div>
@@ -57,14 +57,15 @@ export default async function Commitments({
                     New total quantity
                     <span className="hint">
                       Enter a smaller quantity, or enter 0 to cancel this
-                      commitment.
+                      commitment. If delivery is already arranged, let the
+                      worker know when your plans change.
                     </span>
                     <input
                       name="quantity"
                       type="number"
                       min={0}
                       max={c.quantity - 1}
-                      defaultValue={0}
+                      placeholder="Enter quantity"
                       required
                     />
                   </label>

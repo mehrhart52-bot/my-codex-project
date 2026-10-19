@@ -33,6 +33,9 @@ export default function LoginScreen({ params }: { params: Params }) {
           />
         </label>
         <Submit pending="Signing in…">Login</Submit>
+        <Link className="text-link" href="/forgot-password">
+          Forgot password?
+        </Link>
         <p className="hint">
           Need account access help? Contact your organization’s administrator.
         </p>

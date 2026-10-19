@@ -231,7 +231,9 @@ test("worker signup → admin approval → request → supporter commitment → 
         "Permissions updated. The change takes effect immediately.",
       ),
     ).toBeVisible();
-    await workerPage.reload();
+    await workerPage
+      .getByRole("link", { name: "Check approval status" })
+      .click();
     await workerPage
       .getByRole("link", { name: "＋ Create New Request", exact: true })
       .click();
@@ -278,6 +280,9 @@ test("worker signup → admin approval → request → supporter commitment → 
       .click();
     await expect(workerPage).toHaveURL(/\/requests\/\d+\?message=/);
     const path = new URL(workerPage.url()).pathname;
+    const requestNumber = (
+      await workerPage.locator(".page-head .eyebrow").innerText()
+    ).match(/HTA-\d+/)![0];
     await expect(workerPage.locator("section.card table thead th")).toHaveText([
       "Item",
       "Requested",
@@ -301,7 +306,15 @@ test("worker signup → admin approval → request → supporter commitment → 
     ).toBeVisible();
 
     await register(supporterPage, supporter);
-    await supporterPage.goto(path);
+    await expect(
+      supporterPage.getByRole("region", { name: "How to help" }),
+    ).toBeVisible();
+    await supporterPage.getByLabel("Search requests").fill(requestNumber);
+    await supporterPage
+      .getByRole("button", { name: "Search", exact: true })
+      .click();
+    await supporterPage.getByRole("link", { name: "View Details" }).click();
+    await expect(supporterPage).toHaveURL(new RegExp(path + "$"));
     const deliveryContact = supporterPage.locator(".page-head");
     await expect(
       deliveryContact.getByRole("link", { name: worker.email }),
@@ -315,6 +328,9 @@ test("worker signup → admin approval → request → supporter commitment → 
     await expect(
       supporterPage.getByRole("heading", { name: "Arrange delivery" }),
     ).toHaveCount(0);
+    await expect(
+      supporterPage.getByRole("button", { name: "Confirm commitment" }),
+    ).toBeDisabled();
     await supporterPage
       .getByLabel("Quantity of Dining Chairs to provide")
       .fill("3");
@@ -324,6 +340,16 @@ test("worker signup → admin approval → request → supporter commitment → 
     await expect(
       supporterPage.getByText("Thank you! Your commitment has been saved."),
     ).toBeVisible();
+    await expect(
+      supporterPage.getByRole("region", {
+        name: "Your commitment and next steps",
+      }),
+    ).toContainText("3 × Dining Chairs");
+    await expect(
+      supporterPage.getByRole("region", {
+        name: "Your commitment and next steps",
+      }),
+    ).toContainText("Contact the worker");
     await supporterPage.goto("/requests");
     const card = supporterPage
       .locator("article")
@@ -370,6 +396,9 @@ test("worker signup → admin approval → request → supporter commitment → 
     // Supporter reduction still returns to My Commitments.
     await supporterPage.goto("/commitments");
     await expect(supporterPage.getByText(/received|receipt/i)).toHaveCount(0);
+    await expect(supporterPage.getByLabel(/New total quantity/)).toHaveValue(
+      "",
+    );
     await supporterPage.getByLabel(/New total quantity/).fill("1");
     await supporterPage
       .getByRole("button", { name: "Reduce / cancel commitment" })
@@ -494,4 +523,233 @@ test("login rejects a wrong password and email confirmation is explicitly off", 
   await page.getByRole("button", { name: "Login", exact: true }).click();
   await expect(page.getByText("Email or password is incorrect.")).toBeVisible();
   await login(page, demos.supporter);
+});
+
+test("first-time guidance, draft recovery, competing offers, and mobile layout", async ({
+  browser,
+}) => {
+  test.setTimeout(120000);
+  const contexts = await Promise.all([
+    browser.newContext(),
+    browser.newContext(),
+    browser.newContext(),
+  ]);
+  const [worker, supporter, other] = await Promise.all(
+    contexts.map((c) => c.newPage()),
+  );
+  const capture = process.env.HTA_UX_SCREENSHOTS === "1";
+  try {
+    await worker.goto("/register");
+    await expect(
+      worker.getByText(/Workers’ names, phone numbers, and emails/),
+    ).toBeVisible();
+    if (capture)
+      await worker.screenshot({
+        path: ".local/ux-review/signup-after.png",
+        fullPage: true,
+        caret: "initial",
+      });
+    await login(worker, { ...demos.worker, role: "social_worker" });
+    await worker
+      .getByRole("link", { name: "View Existing Requests", exact: true })
+      .first()
+      .click();
+    await expect(
+      worker.getByRole("combobox", { name: "Show", exact: true }),
+    ).toHaveValue("mine");
+    await worker
+      .getByRole("main")
+      .getByRole("link", { name: /Create New Request/ })
+      .click();
+    await worker.getByRole("button", { name: "Remove item 1" }).click();
+    await expect(
+      worker.getByRole("button", { name: "Submit Request", exact: true }),
+    ).toBeDisabled();
+    await worker.getByRole("button", { name: "＋ Add Item" }).click();
+    await expect(worker.getByLabel("Item 1", { exact: true })).toHaveValue("");
+    await worker.getByLabel("Item 1", { exact: true }).selectOption("Lamp");
+    await worker.getByRole("button", { name: "＋ Add Item" }).click();
+    await expect(worker.getByLabel("Item 2", { exact: true })).toHaveValue("");
+    await worker.getByLabel("Item 2", { exact: true }).selectOption("Other");
+    await worker.getByLabel("Specify item").fill("Laundry basket");
+    await worker.getByLabel("Quantity", { exact: true }).nth(1).fill("2");
+    // HTML accepts the length, but the server trims the summary and rejects it.
+    const shortSummary = "     abc     ";
+    await worker.getByLabel(/Public summary/).fill(shortSummary);
+    await worker
+      .getByRole("button", { name: "Submit Request", exact: true })
+      .click();
+    await expect(worker.locator("form .flash.error")).toContainText(
+      "Add a public summary of at least 10 characters.",
+    );
+    await expect(worker.locator("form .flash.error")).toBeFocused();
+    await expect(worker.getByLabel(/Public summary/)).toHaveValue(shortSummary);
+    await expect(worker.getByLabel("Item 1", { exact: true })).toHaveValue(
+      "Lamp",
+    );
+    await expect(worker.getByLabel("Specify item")).toHaveValue(
+      "Laundry basket",
+    );
+    await expect(
+      worker.getByLabel("Quantity", { exact: true }).nth(1),
+    ).toHaveValue("2");
+    await worker
+      .getByLabel(/Public summary/)
+      .fill("Fictional usability review: a lamp and baskets for a new home.");
+    await worker
+      .getByRole("button", { name: "Submit Request", exact: true })
+      .click();
+    await expect(worker).toHaveURL(/\/requests\/\d+\?message=/);
+    const path = new URL(worker.url()).pathname;
+    const number = (
+      await worker.locator(".page-head .eyebrow").innerText()
+    ).match(/HTA-\d+/)![0];
+    await login(supporter, demos.supporter);
+    await supporter
+      .getByLabel("Search requests")
+      .fill("no-matches-" + Date.now());
+    await supporter
+      .getByRole("button", { name: "Search", exact: true })
+      .click();
+    await expect(
+      supporter.getByRole("heading", { name: "No matching requests" }),
+    ).toBeVisible();
+    await supporter
+      .getByRole("link", { name: "Clear filters", exact: true })
+      .click();
+    await expect(supporter.getByLabel("Search requests")).toHaveValue("");
+    await supporter.getByLabel("Search requests").fill(number);
+    await supporter
+      .getByRole("button", { name: "Search", exact: true })
+      .click();
+    await supporter.getByRole("link", { name: "View Details" }).click();
+    for (const width of [320, 375, 768, 1280]) {
+      await supporter.setViewportSize({ width, height: 900 });
+      expect(
+        await supporter.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth,
+        ),
+        `offer form fits ${width}px`,
+      ).toBe(true);
+    }
+    await supporter.setViewportSize({ width: 375, height: 812 });
+    const about = await supporter
+      .getByRole("heading", { name: "A fresh start, with your help." })
+      .boundingBox();
+    const offerForm = await supporter
+      .getByRole("heading", { name: "Commit to Providing Items" })
+      .boundingBox();
+    expect(about!.y).toBeLessThan(offerForm!.y);
+    if (capture)
+      await supporter.screenshot({
+        path: ".local/ux-review/offer-mobile-after.png",
+        fullPage: true,
+        caret: "initial",
+      });
+    await supporter.setViewportSize({ width: 1280, height: 900 });
+    await login(other, demos.other);
+    await other.goto(path);
+    await supporter.getByLabel("Quantity of Lamp to provide").fill("1");
+    await supporter
+      .getByLabel("Quantity of Laundry basket to provide")
+      .fill("1");
+    await other.getByLabel("Quantity of Lamp to provide").fill("1");
+    await other.getByRole("button", { name: "Confirm commitment" }).click();
+    await expect(
+      other.getByText("Thank you! Your commitment has been saved.", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    // The stale offer must fail atomically without losing the entered quantities.
+    await supporter.getByRole("button", { name: "Confirm commitment" }).click();
+    await expect(supporter.locator("form .flash.error")).toContainText(
+      "An item is no longer available",
+    );
+    await expect(
+      supporter.getByLabel("Quantity of Lamp to provide"),
+    ).toHaveValue("1");
+    await expect(
+      supporter.getByLabel("Quantity of Laundry basket to provide"),
+    ).toHaveValue("1");
+    await supporter
+      .getByRole("link", {
+        name: "Reload the request to check current quantities",
+      })
+      .click();
+    await expect(
+      supporter.getByLabel("Quantity of Lamp to provide"),
+    ).toHaveCount(0);
+    await supporter
+      .getByLabel("Quantity of Laundry basket to provide")
+      .fill("1");
+    await supporter.getByRole("button", { name: "Confirm commitment" }).click();
+    await expect(
+      supporter.getByText("Thank you! Your commitment has been saved.", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await expect(
+      supporter.getByRole("region", { name: "Your commitment and next steps" }),
+    ).toContainText("1 × Laundry basket");
+    await expect(
+      supporter.getByLabel("Quantity of Laundry basket to provide"),
+    ).toHaveValue("0");
+    await expect(
+      supporter.getByRole("button", { name: "Confirm commitment" }),
+    ).toBeDisabled();
+    for (const width of [320, 375, 768, 1280]) {
+      await supporter.setViewportSize({ width, height: 900 });
+      expect(
+        await supporter.evaluate(
+          () => document.documentElement.scrollWidth <= window.innerWidth,
+        ),
+        `detail fits ${width}px`,
+      ).toBe(true);
+    }
+    await supporter.setViewportSize({ width: 375, height: 812 });
+    if (capture)
+      await supporter.screenshot({
+        path: ".local/ux-review/detail-mobile-after.png",
+        fullPage: true,
+        caret: "initial",
+      });
+    await worker.goto(path);
+    const supporters = worker
+      .getByRole("heading", { name: "Supporter commitments" })
+      .locator("..");
+    await expect(supporters).toContainText(demos.supporter.email);
+    await expect(supporters).toContainText(demos.other.email);
+    await worker.getByLabel("I confirm this request should be closed.").check();
+    await worker.getByRole("button", { name: "Confirm closure" }).click();
+    await expect(
+      worker.getByText("Request closed. All records have been preserved.", {
+        exact: true,
+      }),
+    ).toBeVisible();
+    await supporter.goto(path);
+    await expect(
+      supporter.getByRole("heading", { name: "This request is closed" }),
+    ).toBeVisible();
+    await expect(
+      supporter.getByRole("button", { name: "Confirm commitment" }),
+    ).toHaveCount(0);
+    await supporter
+      .getByRole("link", { name: "View or change my commitments" })
+      .click();
+    const offer = supporter
+      .locator("article")
+      .filter({ has: supporter.locator(`a[href="${path}"]`) });
+    await expect(offer.getByLabel(/New total quantity/)).toHaveValue("");
+    await offer.getByLabel(/New total quantity/).fill("0");
+    await offer
+      .getByRole("button", { name: "Reduce / cancel commitment" })
+      .click();
+    await expect(offer.locator(".badge")).toHaveText("Cancelled");
+    await supporter.goto(path);
+    await expect(
+      supporter.getByRole("region", { name: "Your commitment and next steps" }),
+    ).toHaveCount(0);
+  } finally {
+    await Promise.all(contexts.map((c) => c.close()));
+  }
 });

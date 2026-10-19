@@ -4,6 +4,8 @@ Helping neighbors make a house a home.
 
 **[Start here → START_HERE.md](START_HERE.md)** explains the current setup, opening and restarting the app, and a fictional-data exercise.
 
+For a plain-language walkthrough of both roles, see [the testing guide](TESTING_GUIDE.md).
+
 The app connects social workers managing household needs with supporters who provide items. It supports staff approval, public household summaries, commitments, reductions, cancellation, manual closure, administrator reopening, and audit records.
 
 ## Normal development
@@ -41,4 +43,4 @@ New requests save a snapshot of the submitting worker's contact details with the
 
 The app uses only a publishable/anon key. It never uses the management token or a service-role key. The optional isolated test-lab tooling uses local administrative credentials to prepare fictional fixtures.
 
-[Later Vercel deployment](DEPLOYMENT.md) is separate from first-run testing. This stack does not establish healthcare or privacy compliance. Password recovery is not implemented.
+[Later Vercel deployment](DEPLOYMENT.md) is separate from first-run testing. This stack does not establish healthcare or privacy compliance. Self-service password recovery is available from **Forgot password?** on the login screen. The complete email flow is tested against the isolated mail inbox; real inbox delivery must be verified with the project’s email provider. See [password reset email](SUPABASE_SETUP.md#password-reset-email).

@@ -1,8 +1,10 @@
 "use client";
-import { useState } from "react";
+import Link from "next/link";
+import { useActionState, useState } from "react";
 import type { Item } from "@/lib/types";
-import { action } from "@/app/actions";
+import { draftAction } from "@/app/actions";
 import { Submit } from "./Submit";
+import { FormFeedback } from "./FormFeedback";
 export default function CommitForm({
   items,
   requestId,
@@ -10,29 +12,46 @@ export default function CommitForm({
   items: Item[];
   requestId: string;
 }) {
+  const [state, formAction] = useActionState(draftAction, { error: "" });
   const [quantities, setQuantities] = useState<Record<string, number>>({});
   const available = items.filter((i) => i.quantity > i.committed);
+  const total = Object.values(quantities).reduce(
+    (sum, quantity) => sum + quantity,
+    0,
+  );
   if (!available.length)
     return (
       <div className="notice">
         All items currently have commitments. Thank you for checking in — you
-        can help another household.
+        can help another household.{" "}
+        <Link className="text-link" href="/requests">
+          Browse other requests →
+        </Link>
       </div>
     );
   return (
-    <form action={action} className="card stack">
+    <form
+      action={formAction}
+      onReset={(event) => event.preventDefault()}
+      className="card stack"
+    >
       <h2>Commit to Providing Items</h2>
       <p className="muted">
-        Choose what you can give. The social worker will use your account
-        contact details to coordinate with you.
+        Enter a quantity for each item you can provide. Leave the others at 0.
+        Your contact details will be shared with this request’s worker.
       </p>
+      <FormFeedback state={state}>
+        <a className="text-link" href={`/requests/${requestId}`}>
+          Reload the request to check current quantities
+        </a>
+      </FormFeedback>
       <input type="hidden" name="op" value="commit" />
       <input type="hidden" name="requestId" value={requestId} />
       {available.map((i) => (
         <label key={i.id} className="commit-row">
           <span>
             {i.name}
-            <small>{i.quantity - i.committed} available</small>
+            <small>{i.quantity - i.committed} still needed</small>
           </span>
           <input
             aria-label={`Quantity of ${i.name} to provide`}
@@ -60,7 +79,14 @@ export default function CommitForm({
         Please commit only to items you intend to provide. You can reduce your
         quantity later in My Commitments.
       </p>
-      <Submit pending="Reserving items…">Confirm commitment</Submit>
+      <p className="hint" aria-live="polite">
+        {total > 0
+          ? `${total} ${total === 1 ? "item" : "items"} selected. After confirming, contact the worker to arrange delivery.`
+          : "Choose at least one item by entering a quantity of 1 or more."}
+      </p>
+      <Submit pending="Saving commitment…" disabled={total <= 0}>
+        Confirm commitment
+      </Submit>
     </form>
   );
 }

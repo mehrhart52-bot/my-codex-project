@@ -52,9 +52,13 @@ export function PageHead({
 export function Empty({
   title,
   children,
+  href = "/requests",
+  linkLabel = "Explore requests →",
 }: {
   title: string;
   children: React.ReactNode;
+  href?: string;
+  linkLabel?: string;
 }) {
   return (
     <div className="empty">
@@ -63,8 +67,8 @@ export function Empty({
       </span>
       <h2>{title}</h2>
       <p className="muted">{children}</p>
-      <Link className="text-link" href="/requests">
-        Explore requests →
+      <Link className="text-link" href={href}>
+        {linkLabel}
       </Link>
     </div>
   );
@@ -79,4 +83,5 @@ export type Params = {
   error?: string;
   status?: string;
   q?: string;
+  scope?: string;
 };

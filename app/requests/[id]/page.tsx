@@ -23,6 +23,7 @@ export default async function Detail({
   const manager = canManage(user, r);
   const ready =
     items.length > 0 && items.every((i) => i.committed >= i.quantity);
+  const activeCommitments = commitments.filter((c) => c.status === "committed");
   return (
     <>
       <Link href="/requests" className="back-link">
@@ -73,6 +74,30 @@ export default async function Detail({
           )}
         </div>
       </PageHead>
+      {user.role === "supporter" && activeCommitments.length > 0 && (
+        <section
+          className="notice next-steps"
+          aria-label="Your commitment and next steps"
+        >
+          <h2>Your next step</h2>
+          <p>
+            You have offered:{" "}
+            {activeCommitments
+              .map((c) => `${c.quantity} × ${c.name}`)
+              .join(", ")}
+            .
+          </p>
+          <p>
+            {r.owner_email || r.owner_phone
+              ? "Contact the worker using the phone number or email above to agree on delivery details."
+              : "The worker can see your contact details to coordinate delivery. Worker contact details are not available on this older request."}{" "}
+            Saving a commitment does not schedule a delivery or send an email.
+          </p>
+          <Link className="text-link" href="/commitments">
+            View or change my commitments →
+          </Link>
+        </section>
+      )}
       {ready && manager && r.status === "open" && (
         <p className="flash success">
           Every requested item has been committed. This request is ready for
@@ -160,7 +185,7 @@ export default async function Detail({
                             type="number"
                             min={0}
                             max={c.quantity - 1}
-                            defaultValue={0}
+                            placeholder="Enter quantity"
                             required
                           />
                         </label>
@@ -191,7 +216,11 @@ export default async function Detail({
         </div>
         <aside className="stack">
           {user.role === "supporter" && r.status === "open" && (
-            <CommitForm items={items} requestId={id} />
+            <CommitForm
+              key={`${id}:${items.map((item) => `${item.id}:${item.quantity}:${item.committed}`).join(",")}`}
+              items={items}
+              requestId={id}
+            />
           )}{" "}
           {r.status === "closed" && (
             <div className="card">
@@ -200,18 +229,6 @@ export default async function Detail({
                 This household’s request has been preserved for history. New
                 commitments are no longer accepted.
               </p>
-            </div>
-          )}
-          {user.role === "supporter" && commitments.length > 0 && (
-            <div className="card">
-              <h2>Your help matters</h2>
-              <p>
-                You have {commitments.length} commitment record
-                {commitments.length !== 1 ? "s" : ""} for this request.
-              </p>
-              <Link className="text-link" href="/commitments">
-                Manage your commitments →
-              </Link>
             </div>
           )}
           {manager && r.status === "open" && (

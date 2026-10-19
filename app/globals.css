@@ -45,7 +45,7 @@ button {
   cursor: pointer;
 }
 button:disabled {
-  cursor: wait;
+  cursor: not-allowed;
   opacity: 0.65;
 }
 .password-field {
@@ -167,6 +167,17 @@ em {
   border-left: 1px solid var(--line);
   padding-left: 20px;
   white-space: nowrap;
+}
+.notice p:last-child {
+  margin-bottom: 0;
+}
+.how-to-help,
+.next-steps {
+  margin-bottom: 24px;
+}
+.how-to-help ol {
+  margin: 8px 0 0;
+  padding-left: 22px;
 }
 nav {
   display: flex;
@@ -402,6 +413,7 @@ a:focus-visible {
 }
 .filters {
   display: flex;
+  flex-wrap: wrap;
   align-items: end;
   gap: 16px;
   background: #f1f1f1;
@@ -551,6 +563,10 @@ progress::-webkit-progress-value {
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: 26px;
 }
+.detail-grid > *,
+.two-grid > * {
+  min-width: 0;
+}
 .preserve {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -645,6 +661,9 @@ td code {
   font-size: 14px;
   overflow-wrap: anywhere;
 }
+.account-email {
+  overflow-wrap: anywhere;
+}
 .privacy-note {
   padding: 25px;
   text-align: center;
@@ -736,6 +755,7 @@ td code {
   .brand-name {
     border-left: 0;
     padding-left: 0;
+    white-space: normal;
   }
   nav {
     justify-content: center;
@@ -779,8 +799,10 @@ td code {
   .card {
     padding: 22px;
   }
-  .detail-grid aside {
-    order: -1;
+  input,
+  textarea,
+  select {
+    font-size: 16px;
   }
   .two-grid {
     grid-template-columns: 1fr;

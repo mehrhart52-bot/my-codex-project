@@ -49,17 +49,17 @@ Never commit these files or paste their contents into reports.
 
 ## Checks
 
-| Command                    | What it proves                                                                                                                                                       |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run test:unit`        | Three validation/role-helper tests                                                                                                                                   |
-| `npm run test:integration` | Real Supabase Auth and API, approval, dashboard totals, inventory transactions, privacy, permissions, audit, deactivation, and competing commitments                 |
-| `npm run test:browser`     | Chromium registration-error preservation, full account-switching workflow, administrator/supporter redirect behavior, login rejection, and confirmation-off behavior |
-| `npm run test:hosted`      | The same Chromium workflow against the configured hosted development project; requires its ignored settings and demo-account files                                   |
-| `npm test`                 | All three suites, sequentially; missing lab/browser prerequisites fail                                                                                               |
-| `npm run lab:apply`        | Apply the current schema to the local lab and reload the API schema cache                                                                                            |
-| `npm run typecheck`        | TypeScript verification                                                                                                                                              |
-| `npm run format:check`     | Formatting                                                                                                                                                           |
-| `npm run build`            | Production compilation, not an authenticated workflow test                                                                                                           |
+| Command                    | What it proves                                                                                                                                       |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run test:unit`        | Validation, roles, contact snapshots, development settings, and password-recovery rules                                                              |
+| `npm run test:integration` | Real Supabase Auth and API, approval, dashboard totals, inventory transactions, privacy, permissions, audit, deactivation, and competing commitments |
+| `npm run test:browser`     | Chromium signup/approval, requests, offers, draft recovery, mobile layout, and real password-reset email captured in the isolated inbox              |
+| `npm run test:hosted`      | The shared-project workflow against hosted Supabase; excludes recovery tests to avoid sending real email or resetting demo passwords                 |
+| `npm test`                 | All three suites, sequentially; missing lab/browser prerequisites fail                                                                               |
+| `npm run lab:apply`        | Apply the current schema to the local lab and reload the API schema cache                                                                            |
+| `npm run typecheck`        | TypeScript verification                                                                                                                              |
+| `npm run format:check`     | Formatting                                                                                                                                           |
+| `npm run build`            | Production compilation, not an authenticated workflow test                                                                                           |
 
 The browser runner starts and stops its own app server and refuses to reuse an unknown server. Stop your lab app before running browser tests. Traces, screenshots, and videos are disabled to avoid saving passwords or sessions. Failure context and generated artifacts are Git-ignored.
 
@@ -79,4 +79,4 @@ For an existing authorized app database at `5f12de1`, apply `supabase/updates/20
 
 Local Supabase has email confirmation disabled and captures mail locally; fictional registration requires no email. Tests assert that configuration and successful immediate sign-in. They do not prove hosted email delivery or confirmation-enabled registration.
 
-The hosted browser suite verifies project connectivity and the complete fictional workflow. Password recovery is absent. Vercel, a user's Mac first run, and fresh-cloud-machine restoration must be verified separately.
+The hosted browser suite verifies project connectivity and the complete fictional workflow. Password recovery is verified separately against the isolated Mailpit inbox on port 54324, including a different browser, mismatched passwords, old-password rejection, invalid/reused links, and the same confirmation for unknown addresses. This does not establish real inbox delivery from hosted Supabase. Vercel, a user's Mac first run, and fresh-cloud-machine restoration must be verified separately.

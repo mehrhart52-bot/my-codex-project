@@ -47,4 +47,15 @@ The setup helper `scripts/hosted-setup.mjs` refuses to initialize a non-empty pr
 
 Everyone using the same project sees the same database, subject to their account role. Stopping the app does not erase Supabase data. A free Supabase project may pause after inactivity; resume it in the dashboard before retrying.
 
-Email confirmation is disabled for this private fictional-data exercise. Hosted email delivery and password recovery are not implemented or verified. Before real-world use, create a separate production project and review access, email, backups, retention, privacy, and organizational requirements.
+Email confirmation is disabled for this private fictional-data exercise. Password recovery is implemented and tested with the isolated mail inbox. Delivery to real inboxes on the hosted project has not been verified. Before real-world use, create a separate production project and review access, email, backups, retention, privacy, and organizational requirements.
+
+## Password reset email
+
+The app uses Supabase’s standard password-reset email and its default link template. No SQL, management token, service-role key, or new application secret is needed.
+
+- For local testing, the allowed redirect addresses must include `http://localhost:3000/reset-password` (the existing `http://localhost:3000/**` entry also works). Use the same hostname when opening the app. The optional isolated test lab also allows `127.0.0.1`.
+- After deploying to Vercel, add the app’s exact `https://…/reset-password` address under **Authentication → URL Configuration → Redirect URLs**. Set the production **Site URL** to the deployed app’s address.
+- Real users need a working email sender. Supabase’s built-in sender may restrict recipients and send volume; configure a supported SMTP provider in the dashboard when needed for real users. Verify delivery with an account whose inbox you control before inviting testers to rely on recovery. No SMTP credential belongs in the app or in chat.
+- Leave the reset email’s default confirmation link in place. It verifies the one-time email token and returns to the app’s reset screen. The app clears the returned credentials from the address bar, verifies the session on the server, and only changes the verified account’s password.
+
+Recovery tests use `tests/browser/password-reset.spec.ts` and the isolated mail inbox on port 54324. The hosted browser suite intentionally excludes these tests so it never resets shared demo passwords or sends recovery email to real recipients.

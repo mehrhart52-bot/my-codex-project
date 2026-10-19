@@ -23,6 +23,6 @@ GitHub pushes can trigger new Vercel builds after that integration exists. SQL u
 
 Use a separate production Supabase project. Review staff access, email confirmation, reliable email delivery, backups/restoration, retention, and organization-specific security/privacy requirements. Confirmation-enabled hosted registration and email delivery are not verified by the local fictional-data tests.
 
-Password recovery is not implemented in this application. Do not invite users with a promise of a working recovery flow until one is implemented and tested.
+Password recovery is implemented and tested with the isolated mail inbox. Before inviting users, add the deployed `/reset-password` address to Supabase’s allowed redirects and verify a real reset email reaches an inbox you control. See [password reset email](SUPABASE_SETUP.md#password-reset-email).
 
 Using Next.js, Supabase, or Vercel does not establish healthcare or privacy compliance.

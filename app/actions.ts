@@ -15,6 +15,23 @@ import {
   RuleError,
 } from "@/lib/service";
 export async function action(form: FormData) {
+  await performAction(form, false);
+}
+
+// Keep request and commitment drafts on screen when validation or saving fails.
+export async function draftAction(
+  _previous: { error: string },
+  form: FormData,
+) {
+  if (!["create", "edit", "commit"].includes(String(form.get("op")))) {
+    return {
+      error: "This form could not be saved. Please reload and try again.",
+    };
+  }
+  return performAction(form, true);
+}
+
+async function performAction(form: FormData, preserveDraft: boolean) {
   const op = String(form.get("op") ?? "");
   const id = String(form.get("requestId") ?? "");
   let target = ["login", "register"].includes(op)
@@ -119,6 +136,7 @@ export async function action(form: FormData) {
       });
     if (op === "create") target = "/requests/new";
     if (op === "edit" && /^[1-9]\d*$/.test(id)) target = `/requests/${id}/edit`;
+    if (preserveDraft) return { error: message };
   }
   revalidatePath("/", "layout");
   redirect(

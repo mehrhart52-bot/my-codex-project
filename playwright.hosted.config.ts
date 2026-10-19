@@ -31,6 +31,8 @@ Object.assign(process.env, {
 
 export default defineConfig({
   testDir: "./tests/browser",
+  // Recovery tests use only the isolated SMTP inbox, never real recipients.
+  testIgnore: "**/password-reset.spec.ts",
   fullyParallel: false,
   workers: 1,
   timeout: 90000,

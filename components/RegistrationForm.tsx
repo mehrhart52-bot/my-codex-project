@@ -31,6 +31,39 @@ export default function RegistrationForm() {
           {state.message}
         </p>
       )}
+      <div className="notice" id="role-help">
+        <p>
+          <strong>Supporter:</strong> Browse household needs and offer items you
+          can provide. You can start right away.
+        </p>
+        <p>
+          <strong>Social worker:</strong> Create requests for households and
+          coordinate with supporters. An administrator must approve your account
+          first.
+        </p>
+        <p className="hint">
+          Workers’ names, phone numbers, and emails appear on requests they
+          submit. Supporter contact details are shared with the request’s worker
+          and administrators when items are committed.
+        </p>
+      </div>
+      <label>
+        User Type
+        <select
+          name="role"
+          aria-label="User Type"
+          defaultValue={state.values.role}
+          aria-invalid={!!state.errors.role}
+          aria-describedby="role-help role-error"
+          required
+        >
+          <option value="supporter">Supporter</option>
+          <option value="social_worker">
+            Social Worker — administrator approval required
+          </option>
+        </select>
+        <FieldError name="role" message={state.errors.role} />
+      </label>
       <div className="two-grid">
         <label>
           First Name
@@ -92,27 +125,6 @@ export default function RegistrationForm() {
         />
         <FieldError name="phone" message={state.errors.phone} />
       </label>
-      <label>
-        User Type
-        <select
-          name="role"
-          aria-label="User Type"
-          defaultValue={state.values.role}
-          aria-invalid={!!state.errors.role}
-          aria-describedby="role-error"
-          required
-        >
-          <option value="supporter">Supporter</option>
-          <option value="social_worker">
-            Social Worker — administrator approval required
-          </option>
-        </select>
-        <FieldError name="role" message={state.errors.role} />
-      </label>
-      <p className="notice">
-        Social worker accounts cannot create or manage requests until an
-        administrator approves them. Supporters can begin helping right away.
-      </p>
       <div className="two-grid">
         <label>
           Password

@@ -20,14 +20,22 @@ export default async function Requests({
   const status = ["open", "closed", "all"].includes(params.status ?? "")
     ? params.status!
     : "open";
-  const rows = await listRequests(user, status, params.q ?? "");
+  const search = (params.q ?? "").trim();
+  const mine = user.role === "social_worker" && params.scope !== "all";
+  const requests = await listRequests(user, status, search);
+  const rows = mine ? requests.filter((r) => r.owner_id === user.id) : requests;
+  const filtered = !!search || status !== "open";
   return (
     <>
       <Flash params={params} />
       <PageHead
         eyebrow="Community needs"
         title="A little help. A lasting impact."
-        description="Find the everyday essentials our neighbors need for their next chapter."
+        description={
+          mine
+            ? "Your household requests and the items supporters have offered."
+            : "Find the everyday essentials our neighbors need for their next chapter."
+        }
       >
         {canCreate(user) && (
           <Link className="button" href="/requests/new">
@@ -35,6 +43,21 @@ export default async function Requests({
           </Link>
         )}
       </PageHead>
+      {user.role === "supporter" && (
+        <section className="notice how-to-help" aria-label="How to help">
+          <strong>How to help</strong>
+          <ol>
+            <li>Open a request to see what is needed.</li>
+            <li>
+              Choose the quantities you can provide and confirm your commitment.
+            </li>
+            <li>
+              Contact the worker to arrange delivery. Your offers are saved in
+              My Commitments.
+            </li>
+          </ol>
+        </section>
+      )}
       {user.role === "social_worker" && !user.approved && (
         <p className="notice">
           Your social worker approval is pending. An administrator must approve
@@ -48,7 +71,7 @@ export default async function Requests({
             name="q"
             defaultValue={params.q}
             maxLength={120}
-            placeholder="Search a request number or household need…"
+            placeholder="Search a request number or summary…"
           />
         </label>
         <label>
@@ -59,7 +82,28 @@ export default async function Requests({
             <option value="all">All Requests</option>
           </select>
         </label>
+        {user.role === "social_worker" && (
+          <label>
+            Show
+            <select name="scope" defaultValue={mine ? "mine" : "all"}>
+              <option value="mine">My requests</option>
+              <option value="all">All workers’ requests</option>
+            </select>
+          </label>
+        )}
         <button className="button secondary">Search</button>
+        {filtered && (
+          <Link
+            className="text-link"
+            href={
+              user.role === "social_worker" && !mine
+                ? "/requests?scope=all"
+                : "/requests"
+            }
+          >
+            Clear filters
+          </Link>
+        )}
       </form>
       <div className="results-heading">
         <span>
@@ -68,8 +112,30 @@ export default async function Requests({
         <span>Every item is a step toward home.</span>
       </div>
       {!rows.length ? (
-        <Empty title="No requests to show yet">
-          {params.q
+        <Empty
+          title={
+            filtered
+              ? "No matching requests"
+              : mine
+                ? "You have no open requests"
+                : "No open requests right now"
+          }
+          href={
+            !filtered && canCreate(user)
+              ? "/requests/new"
+              : user.role === "social_worker" && !mine
+                ? "/requests?scope=all"
+                : "/requests"
+          }
+          linkLabel={
+            !filtered && canCreate(user)
+              ? "Create a request →"
+              : filtered
+                ? "Clear filters →"
+                : "Check for requests →"
+          }
+        >
+          {filtered
             ? "Try another search or status filter."
             : canCreate(user)
               ? "Create a household request to begin connecting with supporters."
@@ -103,6 +169,13 @@ export default async function Requests({
                 value={Number(r.committed)}
                 aria-label={`${r.committed} of ${r.needed} items committed`}
               />
+              {r.status === "open" && (
+                <p className="hint">
+                  {Number(r.needed) > Number(r.committed)
+                    ? `${Number(r.needed) - Number(r.committed)} still needed`
+                    : "All items committed"}
+                </p>
+              )}
               <Link href={`/requests/${r.id}`} className="request-link">
                 View Details <span aria-hidden="true">→</span>
               </Link>

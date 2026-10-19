@@ -16,8 +16,8 @@ export default async function Register({
       <p className="eyebrow">Join your community</p>
       <h1>Create an account</h1>
       <p className="muted">
-        All fields are required. Your contact information is shared only with
-        authorized request managers when you commit to items.
+        Choose how you would like to help, then enter your contact details. All
+        fields are required.
       </p>
       <Flash params={await searchParams} />
       <RegistrationForm />

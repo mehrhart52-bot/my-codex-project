@@ -20,10 +20,19 @@ export default async function Dashboard({
         description="Create a household request or check on existing requests."
       />
       {!user.approved && (
-        <p className="notice">
-          Your social worker approval is pending. An administrator must approve
-          your account before you can create or manage requests.
-        </p>
+        <section className="notice" aria-label="Account approval">
+          <p>
+            Your social worker approval is pending. Ask your organization’s
+            administrator to approve the account registered with {user.email}.
+          </p>
+          <p>
+            You can browse requests while you wait. After approval, check your
+            status below to begin creating requests.
+          </p>
+          <a className="button secondary" href="/dashboard">
+            Check approval status
+          </a>
+        </section>
       )}
       <div className="two-grid dashboard-options">
         <section className="card stack">

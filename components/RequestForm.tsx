@@ -1,7 +1,8 @@
 "use client";
-import { useState } from "react";
-import { action } from "@/app/actions";
+import { useActionState, useState } from "react";
+import { draftAction } from "@/app/actions";
 import { Submit } from "./Submit";
+import { FormFeedback } from "./FormFeedback";
 import type { CatalogItem } from "@/lib/service";
 import type { Item } from "@/lib/types";
 type Row = {
@@ -31,6 +32,8 @@ export default function RequestForm({
   initial?: { id: string; summary: string; items: Item[] };
   summaryMaxLength?: number;
 }) {
+  const [state, formAction] = useActionState(draftAction, { error: "" });
+  const [summary, setSummary] = useState(initial?.summary ?? "");
   const [rows, setRows] = useState<Row[]>(initial ? [] : [emptyRow(0)]);
   const [nextKey, setNextKey] = useState(1);
   const [existing, setExisting] = useState(
@@ -40,7 +43,12 @@ export default function RequestForm({
     setRows(rows.map((r) => (r.key === key ? { ...r, ...value } : r)));
   }
   return (
-    <form action={action} className="stack">
+    <form
+      action={formAction}
+      onReset={(event) => event.preventDefault()}
+      className="stack"
+    >
+      <FormFeedback state={state} />
       <input type="hidden" name="op" value={initial ? "edit" : "create"} />
       {initial && <input type="hidden" name="requestId" value={initial.id} />}
       <section className="card stack">
@@ -61,7 +69,8 @@ export default function RequestForm({
             minLength={10}
             maxLength={summaryMaxLength}
             rows={3}
-            defaultValue={initial?.summary}
+            value={summary}
+            onChange={(e) => setSummary(e.target.value)}
             placeholder="A neighbor is moving into their first apartment and needs a few essentials to settle in."
           />
         </label>
@@ -168,6 +177,11 @@ export default function RequestForm({
             </button>
           </div>
         ))}
+        {!initial && rows.length === 0 && (
+          <p className="notice">
+            Add at least one household item before submitting.
+          </p>
+        )}
         <button
           type="button"
           className="button secondary"
@@ -188,7 +202,9 @@ export default function RequestForm({
         )}
       </section>
       <div className="actions">
-        <Submit>{initial ? "Save request" : "Submit Request"}</Submit>
+        <Submit disabled={!initial && rows.length === 0}>
+          {initial ? "Save request" : "Submit Request"}
+        </Submit>
         <a
           className="button subtle"
           href={initial ? `/requests/${initial.id}` : "/requests"}
