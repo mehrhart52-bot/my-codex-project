@@ -2,6 +2,7 @@ import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { spawn, spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
+import { developmentSettings } from "./development-settings.mjs";
 
 const envPath = resolve(".env.local");
 const nextBin = resolve("node_modules/next/dist/bin/next");
@@ -23,8 +24,16 @@ if (existsSync(envPath)) process.loadEnvFile(envPath);
 
 const urlName = "NEXT_PUBLIC_SUPABASE_URL";
 const keyName = "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY";
-let url = process.env[urlName]?.trim();
-let key = process.env[keyName]?.trim();
+const settings = developmentSettings(
+  process.env[urlName],
+  process.env[keyName],
+);
+let { url, key } = settings;
+if (settings.sharedDemo) {
+  console.log(
+    "Using the shared demo project. Sign in with your demo email and password.\n",
+  );
+}
 
 if (!url || !key) {
   if (!process.stdin.isTTY) {

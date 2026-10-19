@@ -1,16 +1,10 @@
-"use client";
-
 import Link from "next/link";
-import { useState } from "react";
 import { action } from "@/app/actions";
 import { Submit } from "./Submit";
 import { Flash, type Params } from "./ui";
 import { PasswordInput } from "./PasswordInput";
 
 export default function LoginScreen({ params }: { params: Params }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
   return (
     <div className="auth-shell">
       <p className="eyebrow">Rescue Mission</p>
@@ -26,8 +20,6 @@ export default function LoginScreen({ params }: { params: Params }) {
             type="email"
             name="email"
             maxLength={254}
-            value={email}
-            onChange={(event) => setEmail(event.target.value)}
             required
           />
         </label>
@@ -37,8 +29,6 @@ export default function LoginScreen({ params }: { params: Params }) {
             autoComplete="current-password"
             name="password"
             maxLength={128}
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
             required
           />
         </label>

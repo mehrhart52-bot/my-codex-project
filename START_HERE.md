@@ -5,7 +5,7 @@ The application and its hosted Supabase development database are ready for ficti
 ## Preview in your browser with GitHub Codespaces
 
 1. Open [the GitHub repository](https://github.com/mehrhart52-bot/my-codex-project), select **Code → Codespaces**, and open your existing Codespace or create one on `main`.
-2. In its terminal, run `npm run dev`. A fresh checkout prompts for your Supabase project URL and publishable key.
+2. In its terminal, run `npm run dev`. A fresh checkout connects to the shared fictional demo project automatically.
 3. When port 3000 is detected, select **Open in Browser**. You can also open **Ports** and select the globe beside port 3000. Keep visibility **Private**.
 4. The first page offers **Login** and **Create New Account**. Approved social workers get a choice to create or view requests; supporters go directly to existing requests. New social workers need administrator approval to create requests.
 
@@ -19,8 +19,7 @@ Stop the Codespace when finished; GitHub applies usage allowances and possible c
 2. Open [the GitHub repository](https://github.com/mehrhart52-bot/my-codex-project). Select **Code → Download ZIP**, open the ZIP in Finder, and keep the extracted folder somewhere convenient, such as Documents.
 3. In Finder, right-click the extracted project folder and choose **Services → New Terminal at Folder**. If that option is missing, open Terminal, type `cd ` (including the space), drag the folder into Terminal, and press Return.
 4. Type `npm run dev` and press Return. The first run installs the app's packages automatically.
-5. When prompted, paste the **Project URL** and **Publishable key** from your Supabase project's **Connect** dialog. Never use a secret or service-role key.
-6. Wait for **Ready**, then open [http://localhost:3000](http://localhost:3000) in Safari or Chrome.
+5. Wait for **Ready**, then open [http://localhost:3000](http://localhost:3000) in Safari or Chrome.
 
 You should see **Housing Transition Assistance**, a login form, and a **Create New Account** link. The local address works only while `npm run dev` is running on that Mac.
 
@@ -32,7 +31,9 @@ Enter your email address and password, then select **Login**. The eye beside the
 - **Restart:** open Terminal at the same project folder and run `npm run dev` again.
 - **After restarting the Mac:** repeat the restart step. You do not need to recreate Supabase or enter its settings again.
 
-The settings are stored in `.env.local` inside the project folder and excluded from Git.
+`npm run dev` includes the public connection settings for the shared fictional demo project. A fresh download needs no setup, and an older download pointing to this demo project uses the verified public key automatically. You do not need to edit `.env.local` or copy a key.
+
+If you explicitly configure a different project in `.env.local`, the app uses that project instead. Production builds and deployments require their own settings; the demo defaults apply only to `npm run dev`.
 
 ## Demo accounts
 
@@ -46,7 +47,7 @@ Use these accounts with the fictional development project (`naxlbpsjoonktjbieyft
 
 Type the email and password into the login form and select **Login**. Replace any old password saved by your browser. These credentials are only for fictional development testing; a separate production Supabase project needs its own accounts and private passwords.
 
-Downloading the code does not create these accounts in another Supabase project. If sign-in fails, check that `.env.local` points to the development project above and uses that project's publishable key. Never share secret or service-role keys.
+These demo accounts belong to the shared development project. They are not created automatically in other Supabase projects.
 
 The app also allows you to register more fictional accounts. Social workers require administrator approval before they can create requests. Ordinary registration cannot create an administrator.
 

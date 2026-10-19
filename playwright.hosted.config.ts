@@ -59,7 +59,12 @@ export default defineConfig({
       HTA_HOSTED_TEST: "1",
       NODE_USE_ENV_PROXY: "1",
       NEXT_PUBLIC_SUPABASE_URL: app.url,
-      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: app.key,
+      // Reproduce an incomplete key in the user's local settings while keeping
+      // the test runner's direct Supabase requests independently configured.
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
+        process.env.HTA_TEST_INVALID_DEMO_KEY === "1"
+          ? "sb_publishable_incomplete"
+          : app.key,
     },
   },
 });

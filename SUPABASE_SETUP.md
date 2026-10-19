@@ -15,14 +15,16 @@ The authorized hosted project is configured for fictional development data. Code
 
 The app uses only the public project URL and publishable/anon key. It never uses the Supabase management token or a service-role key.
 
-## Find the two public app settings
+## Using your own Supabase project
 
-In the Supabase dashboard, open the project and select **Connect**. Copy:
+`npm run dev` already includes the shared fictional demo project's public connection settings. No account setup or key copying is needed for that preview.
+
+To use a different project, open it in the Supabase dashboard and select **Connect**. Copy:
 
 1. **Project URL** — starts with `https://` and ends with `.supabase.co`.
 2. **Publishable key** — usually starts with `sb_publishable_`. A legacy `anon` key also works.
 
-Run `npm run dev` in a fresh project download. The first run asks for those values and stores them in the Git-ignored `.env.local` file. Never enter a key labeled **secret** or **service_role**.
+Copy `.env.example` to `.env.local` and enter those two values for your own project. The file is excluded from Git. Never enter a key labeled **secret** or **service_role**. Production builds and deployments always use explicitly configured settings; they do not load the shared demo defaults.
 
 ## Management-token cleanup
 
