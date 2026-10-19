@@ -6,18 +6,18 @@ import type { CatalogItem } from "@/lib/service";
 import type { Item } from "@/lib/types";
 type Row = {
   key: number;
-  catalogId: number;
+  catalogId: number | null;
   optionName: string;
   name: string;
   quantity: number;
 };
 
-function rowForCatalog(key: number, item: CatalogItem): Row {
+function emptyRow(key: number): Row {
   return {
     key,
-    catalogId: item.id,
-    optionName: item.name,
-    name: item.customName ?? "",
+    catalogId: null,
+    optionName: "",
+    name: "",
     quantity: 1,
   };
 }
@@ -29,9 +29,7 @@ export default function RequestForm({
   catalog: CatalogItem[];
   initial?: { id: string; summary: string; items: Item[] };
 }) {
-  const [rows, setRows] = useState<Row[]>(
-    initial ? [] : [rowForCatalog(0, catalog[0])],
-  );
+  const [rows, setRows] = useState<Row[]>(initial ? [] : [emptyRow(0)]);
   const [nextKey, setNextKey] = useState(1);
   const [existing, setExisting] = useState(
     initial?.items.map((i) => ({ id: i.id, quantity: i.quantity })) ?? [],
@@ -105,11 +103,13 @@ export default function RequestForm({
               Item {index + 1}
               <select
                 aria-label={`Item ${index + 1}`}
+                required
                 value={r.optionName}
                 onChange={(e) => {
                   const selected = catalog.find(
                     (item) => item.name === e.target.value,
-                  )!;
+                  );
+                  if (!selected) return;
                   update(r.key, {
                     catalogId: selected.id,
                     optionName: selected.name,
@@ -117,6 +117,9 @@ export default function RequestForm({
                   });
                 }}
               >
+                <option value="" disabled>
+                  Select an item...
+                </option>
                 {catalog.map((c) => (
                   <option key={`${c.id}:${c.name}`} value={c.name}>
                     {c.name}
@@ -163,7 +166,7 @@ export default function RequestForm({
           type="button"
           className="button secondary"
           onClick={() => {
-            setRows([...rows, rowForCatalog(nextKey, catalog[0])]);
+            setRows([...rows, emptyRow(nextKey)]);
             setNextKey(nextKey + 1);
           }}
         >
