@@ -79,11 +79,6 @@ test("entry shows login and registration, protects requests, and supports a narr
       .getByLabel("Email address", { exact: true })
       .boundingBox();
     expect(demoBox?.y).toBeLessThan(emailBox?.y ?? 0);
-    await demoButton.click();
-    await expect(page.getByLabel("Email address", { exact: true })).toHaveValue(
-      demos.admin.email,
-    );
-    await expect(password).toHaveValue(demos.admin.password);
   }
   await expect(
     page.getByRole("link", { name: "View Existing Requests" }),
@@ -104,6 +99,22 @@ test("entry shows login and registration, protects requests, and supports a narr
   await expect(page).toHaveURL(/\/register$/);
   await page.goto("/requests");
   await expect(page).toHaveURL(/\/login$/);
+});
+
+test("demo shortcuts sign in without typing credentials", async ({ page }) => {
+  test.skip(!hosted, "Hosted demo accounts are not available in the local lab");
+
+  for (const role of ["Administrator", "Social Worker", "Supporter"]) {
+    await page.goto("/login");
+    await page.getByRole("button", { name: `Use ${role} Demo` }).click();
+    await expect(page).toHaveURL(
+      role === "Social Worker"
+        ? /\/dashboard\?message=/
+        : /\/requests\?message=/,
+    );
+    await page.getByRole("button", { name: "Logout" }).click();
+    await expect(page).toHaveURL(/\/\?message=/);
+  }
 });
 
 test("returning workers choose an action and supporters go directly to requests", async ({
